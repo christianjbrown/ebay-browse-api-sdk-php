@@ -1,0 +1,24 @@
+{
+    "name": "christianjbrown/ebay-find-service-api",
+    "require": {
+        "php": "^8.2",
+        "christianjbrown/user-friendly-exception": "dev-main",
+        "christianjbrown/json-api-client": "dev-main",
+        "psr/http-client": "^1.0"
+    },
+    "autoload": {
+        "psr-4": {
+            "ChristianBrown\\eBay\\FindService\\": "src/"
+        }
+    },
+    "repositories": [
+        {
+            "type": "github",
+            "url": "git@github.com:christianjbrown/user-friendly-exception.git"
+        },
+        {
+            "type": "github",
+            "url": "git@github.com:christianjbrown/json-api-client.git"
+        }
+    ]
+}
