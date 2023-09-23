@@ -2,9 +2,9 @@
 
 declare(strict_types=1);
 
-namespace ChristianBrown\eBay\FindService\Transformer;
+namespace ChristianBrown\eBay\FindServiceApi\Transformer;
 
-use ChristianBrown\eBay\FindService\Model\Pagination;
+use ChristianBrown\eBay\FindServiceApi\Model\Pagination;
 
 interface PaginationTransformerInterface
 {

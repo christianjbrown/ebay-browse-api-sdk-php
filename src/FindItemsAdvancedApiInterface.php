@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace ChristianBrown\eBay\FindService;
 
-use ChristianBrown\eBay\FindService\Model\ResultSet;
+use ChristianBrown\eBay\FindServiceApi\Model\ResultSet;
 
 interface FindItemsAdvancedApiInterface extends FindServiceApiInterface
 {

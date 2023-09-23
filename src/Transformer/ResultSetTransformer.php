@@ -2,10 +2,10 @@
 
 declare(strict_types=1);
 
-namespace ChristianBrown\eBay\FindService\Transformer;
+namespace ChristianBrown\eBay\FindServiceApi\Transformer;
 
+use ChristianBrown\eBay\FindServiceApi\Model\ResultSet;
 use ChristianBrown\UserFriendlyException\UserFriendlyException;
-use ChristianBrown\eBay\FindService\Model\ResultSet;
 
 final class ResultSetTransformer implements ResultSetTransformerInterface
 {

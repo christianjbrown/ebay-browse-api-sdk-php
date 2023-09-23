@@ -4,12 +4,12 @@ declare(strict_types=1);
 
 namespace ChristianBrown\eBay\FindService;
 
+use ChristianBrown\eBay\FindServiceApi\Model\ResultSet;
+use ChristianBrown\eBay\FindServiceApi\Transformer\DatasTransformerInterface;
+use ChristianBrown\eBay\FindServiceApi\Transformer\JsonEndpointBadResponseTransformer;
+use ChristianBrown\eBay\FindServiceApi\Transformer\ResultSetTransformer;
 use ChristianBrown\JsonApiClient\RequestSender;
 use ChristianBrown\UserFriendlyException\UserFriendlyException;
-use ChristianBrown\eBay\FindService\Model\ResultSet;
-use ChristianBrown\eBay\FindService\Transformer\DatasTransformerInterface;
-use ChristianBrown\eBay\FindService\Transformer\JsonEndpointBadResponseTransformer;
-use ChristianBrown\eBay\FindService\Transformer\ResultSetTransformer;
 
 abstract class AbstractFindServiceApi implements FindServiceApiInterface
 {

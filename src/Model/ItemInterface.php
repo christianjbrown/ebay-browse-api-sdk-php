@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace ChristianBrown\eBay\FindService\Model;
+namespace ChristianBrown\eBay\FindServiceApi\Model;
 
 interface ItemInterface extends ModelInterface
 {

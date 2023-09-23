@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace ChristianBrown\eBay\FindService;
 
-use ChristianBrown\eBay\FindService\Model\ResultSet;
-use ChristianBrown\eBay\FindService\Transformer\ItemsTransformer;
+use ChristianBrown\eBay\FindServiceApi\Model\ResultSet;
+use ChristianBrown\eBay\FindServiceApi\Transformer\ItemsTransformer;
 
 final class FindItemsAdvancedApi extends AbstractFindServiceApi implements FindItemsAdvancedApiInterface
 {
