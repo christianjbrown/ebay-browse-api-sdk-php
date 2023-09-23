@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace ChristianBrown\eBay\FindService;
+namespace ChristianBrown\eBay\FindServiceApi;
 
 interface FindServiceApiInterface
 {
