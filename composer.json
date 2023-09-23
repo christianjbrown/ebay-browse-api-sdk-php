@@ -8,7 +8,7 @@
     },
     "autoload": {
         "psr-4": {
-            "ChristianBrown\\eBay\\FindService\\": "src/"
+            "ChristianBrown\\eBay\\FindServiceApi\\": "src/"
         }
     },
     "repositories": [
