@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace ChristianBrown\eBay\FindServiceApi\Transformer;
 
-use ChristianBrown\eBay\FindServiceApi\Model\Pagination;
+use ChristianBrown\eBay\FindServiceApi\Model\PaginationInterface;
 
 interface PaginationTransformerInterface
 {
@@ -19,5 +19,5 @@ interface PaginationTransformerInterface
         self::DATA_KEY_PAGINATION_ENTRIES_TOTAL_ENTRIES,
     ];
 
-    public function transform(array $data): Pagination;
+    public function transform(array $data): PaginationInterface;
 }

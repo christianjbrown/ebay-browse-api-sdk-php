@@ -6,11 +6,11 @@ namespace ChristianBrown\eBay\FindServiceApi\Transformer;
 
 final class ItemsTransformer implements ItemsTransformerInterface
 {
-    private ItemTransformer $itemTransformer;
+    private ItemTransformerInterface $itemTransformer;
 
-    public function __construct()
+    public function __construct(ItemTransformerInterface $itemTransformer)
     {
-        $this->itemTransformer = new ItemTransformer();
+        $this->itemTransformer = $itemTransformer;
     }
 
     public function transform(array $data): array

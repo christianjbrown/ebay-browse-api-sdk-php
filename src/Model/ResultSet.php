@@ -7,9 +7,9 @@ namespace ChristianBrown\eBay\FindServiceApi\Model;
 final class ResultSet implements ResultSetInterface
 {
     private array $objects;
-    private Pagination $pagination;
+    private PaginationInterface $pagination;
 
-    public function __construct(Pagination $pagination, array $objects = [])
+    public function __construct(PaginationInterface $pagination, array $objects = [])
     {
         $this->pagination = $pagination;
         $this->objects = $objects;
@@ -20,7 +20,7 @@ final class ResultSet implements ResultSetInterface
         return $this->objects;
     }
 
-    public function getPagination(): Pagination
+    public function getPagination(): PaginationInterface
     {
         return $this->pagination;
     }

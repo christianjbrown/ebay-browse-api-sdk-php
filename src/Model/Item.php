@@ -6,7 +6,7 @@ namespace ChristianBrown\eBay\FindServiceApi\Model;
 
 final class Item implements ItemInterface
 {
-    private int $itemId;
+    private ?int $itemId = null;
 
     public function getItemId(): ?int
     {

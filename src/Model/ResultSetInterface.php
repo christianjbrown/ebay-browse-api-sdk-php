@@ -8,5 +8,5 @@ interface ResultSetInterface
 {
     public function getObjects(): array;
 
-    public function getPagination(): Pagination;
+    public function getPagination(): PaginationInterface;
 }
