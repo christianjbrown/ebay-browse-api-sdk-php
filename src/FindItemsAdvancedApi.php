@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace ChristianBrown\eBay\FindServiceApi;
 
-use ChristianBrown\eBay\FindServiceApi\Model\ResultSet;
+use ChristianBrown\eBay\FindServiceApi\Model\ResultSetInterface;
 use ChristianBrown\eBay\FindServiceApi\Transformer\ItemsTransformer;
 
 final class FindItemsAdvancedApi extends AbstractFindServiceApi implements FindItemsAdvancedApiInterface
@@ -17,7 +17,7 @@ final class FindItemsAdvancedApi extends AbstractFindServiceApi implements FindI
         $this->itemsTransformer = new ItemsTransformer();
     }
 
-    public function getBySeller(string $username, int $offset = 0, ?int $limit = null): ResultSet
+    public function getBySeller(string $username, int $offset = 0, ?int $limit = null): ResultSetInterface
     {
         $params = [
             self::API_KEY_ITEM_FILTER_NAME => self::API_VALUE_ITEM_FILTER_NAME,

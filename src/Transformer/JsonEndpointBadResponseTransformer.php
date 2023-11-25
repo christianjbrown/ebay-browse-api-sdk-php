@@ -4,16 +4,10 @@ declare(strict_types=1);
 
 namespace ChristianBrown\eBay\FindServiceApi\Transformer;
 
-use ChristianBrown\JsonApiClient\BadResponseTransformerInterface;
 use Psr\Http\Message\ResponseInterface;
 
-final class JsonEndpointBadResponseTransformer implements BadResponseTransformerInterface
+final class JsonEndpointBadResponseTransformer implements JsonEndpointBadResponseTransformerInterface
 {
-    private const ERROR_DESCRIPTION_KEY = 'error_description';
-    private const FRIENDLY_NAME = 'eBay\'s API';
-    private const MESSAGE_FROM_ERROR_DESCRIPTION = 'Got a %d response from %s: %s';
-    private const MESSAGE_GENERIC = 'Got a %d response from %s';
-
     public function getFriendlyErrorFromBadResponse(ResponseInterface $response): string
     {
         $statusCode = $response->getStatusCode();
