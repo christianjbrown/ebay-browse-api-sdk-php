@@ -6,6 +6,17 @@ namespace ChristianBrown\eBay\FindServiceApi\Model;
 
 final class Item implements ItemInterface
 {
-    public int $itemId;
-    // @todo Lots more fields to transform if we need them..
+    private int $itemId;
+
+    public function getItemId(): ?int
+    {
+        return $this->itemId;
+    }
+
+    public function setItemId(?int $itemId): ItemInterface
+    {
+        $this->itemId = $itemId;
+
+        return $this;
+    }
 }
