@@ -15,5 +15,27 @@ composer require christianjbrown/ebay-find-service-api
 ## Usage
 
 ```php
-// @todo
+use ChristianBrown\JsonApiClient\RequestSender;
+use ChristianBrown\eBay\FindServiceApi\Endpoint\FindItemsAdvancedApi;
+use ChristianBrown\eBay\FindServiceApi\Request\RequestMultipleApi;
+use ChristianBrown\eBay\FindServiceApi\Transformer\ItemTransformer;
+use ChristianBrown\eBay\FindServiceApi\Transformer\ItemsTransformer;
+use ChristianBrown\eBay\FindServiceApi\Transformer\JsonEndpointBadResponseTransformer;
+use ChristianBrown\eBay\FindServiceApi\Transformer\PaginationTransformer;
+
+$clientId = getenv('EBAY_CLIENT_ID');
+$sellerUsername = getenv('EBAY_SELLER_USERNAME');
+
+$badResponseTransformer = new JsonEndpointBadResponseTransformer();
+$requestSender = new RequestSender($badResponseTransformer);
+$paginationTransformer = new PaginationTransformer();
+$requestMultipleApi = new RequestMultipleApi($requestSender, $paginationTransformer, $clientId);
+
+$itemTransformer = new ItemTransformer();
+$itemsTransformer = new ItemsTransformer($itemTransformer);
+
+$findItemsAdvancedApi = new FindItemsAdvancedApi($requestMultipleApi, $itemsTransformer);
+$resultSet = $findItemsAdvancedApi->getBySeller($sellerUsername);
+
+$items = $resultSet->getObjects();
 ```
