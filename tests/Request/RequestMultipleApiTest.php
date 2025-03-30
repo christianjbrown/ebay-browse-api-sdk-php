@@ -11,7 +11,8 @@ use ChristianBrown\eBay\FindServiceApi\Request\RequestMultipleApi;
 use ChristianBrown\eBay\FindServiceApi\Request\RequestMultipleApiInterface;
 use ChristianBrown\eBay\FindServiceApi\Transformer\ObjectsTransformerInterface;
 use ChristianBrown\eBay\FindServiceApi\Transformer\PaginationTransformerInterface;
-use ChristianBrown\JsonApiClient\RequestSenderInterface;
+use ChristianBrown\JsonApiClient\JsonApiRequestExceptionInterface;
+use ChristianBrown\JsonApiClient\JsonApiRequestSenderInterface;
 use InvalidArgumentException;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\DataProvider;
@@ -81,6 +82,7 @@ final class RequestMultipleApiTest extends TestCase
 
     /**
      * @throws Exception
+     * @throws JsonApiRequestExceptionInterface
      */
     public function testTransform(): void
     {
@@ -117,10 +119,9 @@ final class RequestMultipleApiTest extends TestCase
             ->with(['data-pagination'])
             ->willReturn($pagination);
 
-        $requestSender = $this->createMock(RequestSenderInterface::class);
+        $requestSender = $this->createMock(JsonApiRequestSenderInterface::class);
         $requestSender->method('get')
             ->with(
-                ApiInterface::FRIENDLY_NAME,
                 ApiInterface::URL,
                 [
                     'test-param-1-key' => 'test-param-1-value',
@@ -138,16 +139,19 @@ final class RequestMultipleApiTest extends TestCase
         self::assertSame($pagination, $actual->getPagination());
     }
 
+    /**
+     * @throws JsonApiRequestExceptionInterface
+     * @throws Exception
+     */
     #[DataProvider('dataProviderTestTransformInvalid')]
     public function testTransformInvalid(array $data, string $expectedExceptionMessage): void
     {
         $this->expectException(InvalidArgumentException::class);
         $this->expectExceptionMessage($expectedExceptionMessage);
 
-        $requestSender = $this->createMock(RequestSenderInterface::class);
+        $requestSender = $this->createMock(JsonApiRequestSenderInterface::class);
         $requestSender->method('get')
             ->with(
-                ApiInterface::FRIENDLY_NAME,
                 ApiInterface::URL,
                 [
                     'test-param-1-key' => 'test-param-1-value',

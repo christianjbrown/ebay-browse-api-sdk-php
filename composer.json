@@ -1,9 +1,9 @@
 {
     "name": "christianjbrown/ebay-find-service-api",
     "require": {
-        "php": "^8.2",
-        "christianjbrown/user-friendly-exception": "dev-main",
-        "christianjbrown/json-api-client": "dev-main",
+        "php": "^8.3",
+        "christianjbrown/php-json-api-client-lib": "dev-main",
+        "christianjbrown/php-user-friendly-exception-lib": "dev-main",
         "psr/http-client": "^1.0"
     },
     "minimum-stability": "dev",
@@ -13,34 +13,23 @@
             "ChristianBrown\\eBay\\FindServiceApi\\Tests\\": "tests/"
         }
     },
+    "config": {
+        "bin-dir": "bin"
+    },
     "scripts": {
-        "test": [
-            "./vendor/bin/phpunit && open ./.phpunit.cache/code-coverage-html/index.html"
-        ],
-        "fix": [
-            "./vendor/bin/php-cs-fixer fix ./src ./tests -vvv --config=vendor/christianjbrown/php-cs-fixer-wrapper/rule-sets/risky.php"
-        ],
-        "fix-test": [
-            "@fix",
-            "@test"
-        ]
+        "check-style": ["clear && ./bin/php-cs ./src ./tests"],
+        "check-style-diff": ["clear && ./bin/php-cs-diff"],
+        "fix-style": ["clear && ./bin/php-cs-fix ./src ./tests"],
+        "fix-style-diff": ["clear && ./bin/php-cs-fix-diff"],
+        "test": ["clear && XDEBUG_MODE=coverage ./bin/phpunit -d memory_limit=512M && open ./.phpunit.cache/code-coverage-html/index.html"]
     },
     "repositories": [
-        {
-            "type": "github",
-            "url": "git@github.com:christianjbrown/user-friendly-exception.git"
-        },
-        {
-            "type": "github",
-            "url": "git@github.com:christianjbrown/json-api-client.git"
-        },
-        {
-            "type": "github",
-            "url": "git@github.com:christianjbrown/php-cs-fixer-wrapper.git"
-        }
+        {"type": "github", "url": "git@github.com:christianjbrown/php-code-quality-scripts.git"},
+        {"type": "github", "url": "git@github.com:christianjbrown/php-json-api-client-lib.git"},
+        {"type": "github", "url": "git@github.com:christianjbrown/php-user-friendly-exception-lib.git"}
     ],
     "require-dev": {
-        "phpunit/phpunit": "^11.0@dev",
-        "christianjbrown/php-cs-fixer-wrapper": "dev-main"
+        "phpunit/phpunit": "^12.0",
+        "christianjbrown/php-code-quality-scripts": "dev-main"
     }
 }

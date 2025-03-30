@@ -8,7 +8,8 @@ use ChristianBrown\eBay\FindServiceApi\Model\ResultSet;
 use ChristianBrown\eBay\FindServiceApi\Model\ResultSetInterface;
 use ChristianBrown\eBay\FindServiceApi\Transformer\ObjectsTransformerInterface;
 use ChristianBrown\eBay\FindServiceApi\Transformer\PaginationTransformerInterface;
-use ChristianBrown\JsonApiClient\RequestSenderInterface;
+use ChristianBrown\JsonApiClient\JsonApiRequestExceptionInterface;
+use ChristianBrown\JsonApiClient\JsonApiRequestSenderInterface;
 use InvalidArgumentException;
 
 use function is_array;
@@ -18,22 +19,25 @@ final class RequestMultipleApi implements RequestMultipleApiInterface
 {
     private string $clientId;
     private PaginationTransformerInterface $paginationTransformer;
-    private RequestSenderInterface $requestSender;
+    private JsonApiRequestSenderInterface $requestSender;
 
-    public function __construct(RequestSenderInterface $requestSender, PaginationTransformerInterface $paginationTransformer, string $clientId)
+    public function __construct(JsonApiRequestSenderInterface $requestSender, PaginationTransformerInterface $paginationTransformer, string $clientId)
     {
         $this->requestSender = $requestSender;
         $this->paginationTransformer = $paginationTransformer;
         $this->clientId = $clientId;
     }
 
+    /**
+     * @throws JsonApiRequestExceptionInterface
+     */
     public function getMultiple(ObjectsTransformerInterface $objectsTransformer, string $operationName, array $params = []): ResultSetInterface
     {
         $params[self::API_KEY_RESPONSE_DATA_FORMAT] = self::API_VALUE_RESPONSE_DATA_FORMAT_JSON;
         $params[self::API_KEY_SECURITY_APP_NAME] = $this->clientId;
         $params[self::API_KEY_OPERATION_NAME] = $operationName;
 
-        $data = $this->requestSender->get(self::FRIENDLY_NAME, self::URL, $params);
+        $data = $this->requestSender->get(self::URL, $params);
 
         $topLevelName = sprintf('%sResponse', $operationName);
         if (empty($data[$topLevelName][0]) || !is_array($data[$topLevelName][0])) {

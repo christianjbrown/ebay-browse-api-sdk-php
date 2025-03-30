@@ -4,7 +4,7 @@ This is a simple PHP library for the [eBay's Finding API](https://developer.ebay
 
 ## Prerequisites
 
-You will need [PHP](https://www.php.net/) 8.2 (or higher up to 9.0) and [Composer](https://getcomposer.org/).
+You will need [PHP](https://www.php.net/) 8.3 (or higher up to 9.0) and [Composer](https://getcomposer.org/).
 
 ## Installation
 
@@ -15,19 +15,20 @@ composer require christianjbrown/ebay-find-service-api
 ## Usage
 
 ```php
-use ChristianBrown\JsonApiClient\RequestSender;
+use ChristianBrown\JsonApiClient\JsonApiRequestSender;
 use ChristianBrown\eBay\FindServiceApi\Endpoint\FindItemsAdvancedApi;
 use ChristianBrown\eBay\FindServiceApi\Request\RequestMultipleApi;
 use ChristianBrown\eBay\FindServiceApi\Transformer\ItemTransformer;
 use ChristianBrown\eBay\FindServiceApi\Transformer\ItemsTransformer;
-use ChristianBrown\eBay\FindServiceApi\Transformer\JsonEndpointBadResponseTransformer;
 use ChristianBrown\eBay\FindServiceApi\Transformer\PaginationTransformer;
+use GuzzleHttp\Client;
 
 $clientId = getenv('EBAY_CLIENT_ID');
 $sellerUsername = getenv('EBAY_SELLER_USERNAME');
 
-$badResponseTransformer = new JsonEndpointBadResponseTransformer();
-$requestSender = new RequestSender($badResponseTransformer);
+$guzzleClient = new Client();
+$requestSender = new JsonApiRequestSender($guzzleClient);
+
 $paginationTransformer = new PaginationTransformer();
 $requestMultipleApi = new RequestMultipleApi($requestSender, $paginationTransformer, $clientId);
 

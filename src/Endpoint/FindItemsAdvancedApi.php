@@ -21,7 +21,9 @@ final class FindItemsAdvancedApi implements FindItemsAdvancedApiInterface
 
     public function getBySeller(string $username, int $offset = 0, ?int $limit = null): ResultSetInterface
     {
-        /** @todo Use $offset and $limit */
+        /**
+         * @todo Use $offset and $limit
+         */
         $params = [
             self::API_KEY_ITEM_FILTER_NAME => self::API_VALUE_ITEM_FILTER_NAME,
             self::API_KEY_ITEM_FILTER_VALUE => $username,

@@ -8,11 +8,11 @@ use ChristianBrown\eBay\FindServiceApi\Model\PaginationInterface;
 
 interface PaginationTransformerInterface
 {
-    public const DATA_KEY_PAGINATION_ENTRIES_PER_PAGE = 'entriesPerPage';
-    public const DATA_KEY_PAGINATION_ENTRIES_TOTAL_ENTRIES = 'totalEntries';
-    public const DATA_KEY_PAGINATION_ENTRIES_TOTAL_PAGES = 'totalPages';
-    public const DATA_KEY_PAGINATION_PAGE_NUMBER = 'pageNumber';
-    public const DATA_KEYS = [
+    public const string DATA_KEY_PAGINATION_ENTRIES_PER_PAGE = 'entriesPerPage';
+    public const string DATA_KEY_PAGINATION_ENTRIES_TOTAL_ENTRIES = 'totalEntries';
+    public const string DATA_KEY_PAGINATION_ENTRIES_TOTAL_PAGES = 'totalPages';
+    public const string DATA_KEY_PAGINATION_PAGE_NUMBER = 'pageNumber';
+    public const array DATA_KEYS = [
         self::DATA_KEY_PAGINATION_PAGE_NUMBER,
         self::DATA_KEY_PAGINATION_ENTRIES_PER_PAGE,
         self::DATA_KEY_PAGINATION_ENTRIES_TOTAL_PAGES,
