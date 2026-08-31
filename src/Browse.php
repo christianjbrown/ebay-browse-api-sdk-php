@@ -12,7 +12,6 @@ use ChristianBrown\EBay\Browse\Api\ItemCompatibilityApi;
 use ChristianBrown\EBay\Browse\Api\ItemCompatibilityApiInterface;
 use ChristianBrown\EBay\Browse\Api\ItemSummaryApi;
 use ChristianBrown\EBay\Browse\Api\ItemSummaryApiInterface;
-use ChristianBrown\EBay\Browse\Auth\ApplicationAccessTokenTransformer;
 use ChristianBrown\EBay\Browse\Auth\Credentials;
 use ChristianBrown\EBay\Browse\Transformer\AspectDistributionsTransformer;
 use ChristianBrown\EBay\Browse\Transformer\AspectDistributionTransformer;
@@ -462,19 +461,12 @@ final class Browse implements BrowseInterface
             ->setFactory([new Reference(self::SERVICE_API_CLIENT), 'getJsonApiRequestSender']);
 
         $this->container->register(self::SERVICE_ACCESS_TOKEN_TRANSFORMER, AccessTokenTransformer::class);
-        $this->container->register(self::SERVICE_APPLICATION_ACCESS_TOKEN_TRANSFORMER, ApplicationAccessTokenTransformer::class)
-            ->setArguments(
-                [
-                    $this->container->getDefinition(self::SERVICE_ACCESS_TOKEN_TRANSFORMER),
-                ]
-            );
-
         $this->container->register(self::SERVICE_CLIENT_CREDENTIALS_TOKEN_MANAGER, ClientCredentialsTokenManager::class)
             ->setArguments(
                 [
                     $this->container->getDefinition(self::SERVICE_JSON_API_REQUEST_SENDER),
                     $this->accessTokenStore,
-                    $this->container->getDefinition(self::SERVICE_APPLICATION_ACCESS_TOKEN_TRANSFORMER),
+                    $this->container->getDefinition(self::SERVICE_ACCESS_TOKEN_TRANSFORMER),
                     self::OAUTH_TOKEN_URL,
                 ]
             );

@@ -13,7 +13,6 @@ use ChristianBrown\EBay\Browse\Model\SearchPagedCollectionInterface;
 use ChristianBrown\EBay\Browse\Transformer\SearchPagedCollectionTransformerInterface;
 
 use function array_filter;
-use function array_merge;
 use function http_build_query;
 
 final class ItemSummaryApi implements ItemSummaryApiInterface
@@ -75,10 +74,7 @@ final class ItemSummaryApi implements ItemSummaryApiInterface
         // search minus the keyword-only ones, which are passed as null here.
         $query = self::buildQuery(null, null, $charityIds, $categoryIds, null, $aspectFilter, null, $filter, $sort, $fieldgroups, null, $limit, $offset);
         $body = [self::KEY_IMAGE => $image];
-        // eBay rejects a JSON body that does not announce its media type.
-        $headers = array_merge($this->credentials->toHeaders(), [self::HEADER_KEY_CONTENT_TYPE => self::HEADER_VALUE_CONTENT_TYPE_JSON]);
-
-        $data = $this->requestSender->post(self::API_URL_SEARCH_BY_IMAGE, $query, $headers, $body);
+        $data = $this->requestSender->post(self::API_URL_SEARCH_BY_IMAGE, $query, $this->credentials->toHeaders(), $body);
 
         if (empty($data)) {
             throw new UnexpectedResponseException(self::UNEXPECTED_RESPONSE);

@@ -10,7 +10,6 @@ use ChristianBrown\EBay\Browse\Api\ItemCompatibilityApi;
 use ChristianBrown\EBay\Browse\Api\ItemCompatibilityApiInterface;
 use ChristianBrown\EBay\Browse\Api\ItemSummaryApi;
 use ChristianBrown\EBay\Browse\Api\ItemSummaryApiInterface;
-use ChristianBrown\EBay\Browse\Auth\ApplicationAccessTokenTransformer;
 use ChristianBrown\EBay\Browse\Auth\Credentials;
 use ChristianBrown\EBay\Browse\Browse;
 use ChristianBrown\EBay\Browse\Enums\MarketplaceId;
@@ -71,7 +70,6 @@ use PHPUnit\Framework\Attributes\UsesClass;
 use PHPUnit\Framework\TestCase;
 
 #[CoversClass(Browse::class)]
-#[UsesClass(ApplicationAccessTokenTransformer::class)]
 #[UsesClass(AspectDistributionTransformer::class)]
 #[UsesClass(AspectDistributionsTransformer::class)]
 #[UsesClass(AspectValueDistributionTransformer::class)]

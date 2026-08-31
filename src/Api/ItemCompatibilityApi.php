@@ -17,7 +17,6 @@ use Throwable;
 
 use function array_keys;
 use function array_map;
-use function array_merge;
 use function array_values;
 use function rawurlencode;
 use function sprintf;
@@ -52,11 +51,9 @@ final class ItemCompatibilityApi implements ItemCompatibilityApiInterface
 
         $url = sprintf(self::API_URL_SPRINTF, rawurlencode($itemId));
         $body = [self::KEY_COMPATIBILITY_PROPERTIES => self::buildProperties($compatibilityProperties)];
-        // eBay rejects a JSON body that does not announce its media type.
-        $headers = array_merge($this->credentials->toHeaders(), [self::HEADER_KEY_CONTENT_TYPE => self::HEADER_VALUE_CONTENT_TYPE_JSON]);
 
         try {
-            $data = $this->requestSender->post($url, [], $headers, $body);
+            $data = $this->requestSender->post($url, [], $this->credentials->toHeaders(), $body);
         } catch (BadResponseExceptionInterface $exception) {
             throw self::mapNotFound($exception, $itemId);
         }

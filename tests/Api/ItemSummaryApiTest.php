@@ -228,7 +228,6 @@ final class ItemSummaryApiTest extends TestCase
     {
         return [
             CredentialsInterface::HEADER_KEY_AUTHORIZATION => 'Bearer test-access-token',
-            ItemSummaryApiInterface::HEADER_KEY_CONTENT_TYPE => ItemSummaryApiInterface::HEADER_VALUE_CONTENT_TYPE_JSON,
         ];
     }
 }

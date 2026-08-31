@@ -13,7 +13,6 @@ interface BrowseInterface
     public const string OAUTH_TOKEN_URL = 'https://api.ebay.com/identity/v1/oauth2/token';
     public const string SERVICE_ACCESS_TOKEN_TRANSFORMER = 'ebay_browse.transformer.access_token_transformer';
     public const string SERVICE_API_CLIENT = 'ebay_browse.api_client';
-    public const string SERVICE_APPLICATION_ACCESS_TOKEN_TRANSFORMER = 'ebay_browse.transformer.application_access_token_transformer';
     public const string SERVICE_ASPECT_DISTRIBUTION_TRANSFORMER = 'ebay_browse.transformer.aspect_distribution_transformer';
     public const string SERVICE_ASPECT_DISTRIBUTIONS_TRANSFORMER = 'ebay_browse.transformer.aspect_distributions_transformer';
     public const string SERVICE_ASPECT_VALUE_DISTRIBUTION_TRANSFORMER = 'ebay_browse.transformer.aspect_value_distribution_transformer';

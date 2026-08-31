@@ -145,7 +145,6 @@ final class ItemCompatibilityApiTest extends TestCase
     {
         return [
             CredentialsInterface::HEADER_KEY_AUTHORIZATION => 'Bearer test-access-token',
-            ItemCompatibilityApiInterface::HEADER_KEY_CONTENT_TYPE => ItemCompatibilityApiInterface::HEADER_VALUE_CONTENT_TYPE_JSON,
         ];
     }
 }
