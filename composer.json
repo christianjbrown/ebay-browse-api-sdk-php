@@ -1,35 +1,86 @@
 {
-    "name": "christianjbrown/ebay-find-service-api",
+    "name": "christianjbrown/ebay-browse-api-sdk",
+    "description": "A strongly-typed, read-only PHP 8.5+ client for the eBay Browse API that returns typed model objects instead of raw arrays.",
+    "type": "library",
+    "license": "MIT",
+    "keywords": [
+        "ebay",
+        "browse",
+        "api",
+        "client",
+        "ecommerce",
+        "marketplace"
+    ],
+    "authors": [
+        {
+            "name": "Christian Brown"
+        }
+    ],
     "require": {
-        "php": "^8.3",
-        "christianjbrown/php-json-api-client-lib": "dev-main",
-        "christianjbrown/php-user-friendly-exception-lib": "dev-main",
-        "psr/http-client": "^1.0"
+        "php": "^8.5",
+        "christianjbrown/api-client": "dev-main",
+        "christianjbrown/key-value-store": "dev-main",
+        "christianjbrown/oauth2-client": "dev-main",
+        "psr/container": "^2.0",
+        "symfony/dependency-injection": "^8.0"
     },
-    "minimum-stability": "dev",
+    "require-dev": {
+        "christianjbrown/code-quality-scripts": "dev-main",
+        "phpstan/phpstan": "^2.0",
+        "phpunit/phpunit": "^13.0"
+    },
     "autoload": {
         "psr-4": {
-            "ChristianBrown\\eBay\\FindServiceApi\\": "src/",
-            "ChristianBrown\\eBay\\FindServiceApi\\Tests\\": "tests/"
+            "ChristianBrown\\EBay\\Browse\\": "src/"
         }
     },
-    "config": {
-        "bin-dir": "bin"
+    "autoload-dev": {
+        "psr-4": {
+            "ChristianBrown\\EBay\\Browse\\Tests\\": "tests/"
+        }
     },
     "scripts": {
-        "check-style": ["clear && ./bin/php-cs ./src ./tests"],
-        "check-style-diff": ["clear && ./bin/php-cs-diff"],
-        "fix-style": ["clear && ./bin/php-cs-fix ./src ./tests"],
-        "fix-style-diff": ["clear && ./bin/php-cs-fix-diff"],
-        "test": ["clear && XDEBUG_MODE=coverage ./bin/phpunit -d memory_limit=512M && open ./.phpunit.cache/code-coverage-html/index.html"]
+        "test": [
+            "clear && XDEBUG_MODE=coverage php -d memory_limit=-1 ./bin/phpunit && open ./.phpunit.cache/code-coverage-html/index.html"
+        ],
+        "stan": [
+            "clear && ./bin/phpstan analyse --memory-limit=1G"
+        ],
+        "check-style": [
+            "clear && ./bin/php-cs ./src ./tests"
+        ],
+        "check-style-diff": [
+            "clear && ./bin/php-cs-diff"
+        ],
+        "fix-style": [
+            "clear && ./bin/php-cs-fix ./src ./tests"
+        ],
+        "fix-style-diff": [
+            "clear && ./bin/php-cs-fix-diff"
+        ]
+    },
+    "config": {
+        "bin-dir": "bin",
+        "allow-plugins": {
+            "dealerdirect/phpcodesniffer-composer-installer": true
+        }
     },
     "repositories": [
-        {"type": "github", "url": "git@github.com:christianjbrown/php-code-quality-scripts.git"},
-        {"type": "github", "url": "git@github.com:christianjbrown/php-json-api-client-lib.git"},
-        {"type": "github", "url": "git@github.com:christianjbrown/php-user-friendly-exception-lib.git"}
-    ],
-    "require-dev": {
-        "phpunit/phpunit": "^12.0",
-        "christianjbrown/php-code-quality-scripts": "dev-main"
-    }
+        {
+            "type": "github",
+            "url": "git@github.com:christianjbrown/api-client-php.git"
+        },
+        {
+            "type": "github",
+            "url": "git@github.com:christianjbrown/code-quality-scripts-php.git"
+        },
+        {
+            "type": "github",
+            "url": "git@github.com:christianjbrown/key-value-store-php.git"
+        },
+        {
+            "type": "github",
+            "url": "git@github.com:christianjbrown/oauth2-client-php.git"
+        }
+    ]
 }
