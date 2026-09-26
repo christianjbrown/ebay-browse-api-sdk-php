@@ -42,8 +42,11 @@ final class ItemSummaryApiTest extends TestCase
 
         $api = self::buildApi($requestSender, $transformer);
 
-        self::assertSame($collection, $api->search('nhs volunteer pin badge'));
-        self::assertSame($collection, $api->search('nhs volunteer pin badge'));
+        $first = $api->search('nhs volunteer pin badge');
+        $second = $api->search('nhs volunteer pin badge');
+
+        self::assertSame($collection, $first);
+        self::assertSame($collection, $second);
     }
 
     public function testSearchByImage(): void
