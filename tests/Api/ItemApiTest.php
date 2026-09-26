@@ -50,8 +50,11 @@ final class ItemApiTest extends TestCase
 
         $api = self::buildApi($requestSender, self::createStub(ItemTransformerInterface::class), $itemGroupTransformer);
 
-        self::assertSame($itemGroup, $api->getMultipleByItemGroupId('800318966643'));
-        self::assertSame($itemGroup, $api->getMultipleByItemGroupId('800318966643'));
+        $first = $api->getMultipleByItemGroupId('800318966643');
+        $second = $api->getMultipleByItemGroupId('800318966643');
+
+        self::assertSame($itemGroup, $first);
+        self::assertSame($itemGroup, $second);
     }
 
     public function testGetMultipleByItemGroupIdSkippingCacheThrowsOnEmptyResponse(): void
@@ -135,8 +138,11 @@ final class ItemApiTest extends TestCase
 
         $api = self::buildApi($requestSender, $itemTransformer, self::createStub(ItemGroupTransformerInterface::class));
 
-        self::assertSame($item, $api->getOneById(self::ITEM_ID));
-        self::assertSame($item, $api->getOneById(self::ITEM_ID));
+        $first = $api->getOneById(self::ITEM_ID);
+        $second = $api->getOneById(self::ITEM_ID);
+
+        self::assertSame($item, $first);
+        self::assertSame($item, $second);
     }
 
     public function testGetOneByIdRethrowsOtherBadResponses(): void
@@ -253,8 +259,11 @@ final class ItemApiTest extends TestCase
 
         $api = self::buildApi($requestSender, $itemTransformer, self::createStub(ItemGroupTransformerInterface::class));
 
-        self::assertSame($item, $api->getOneByLegacyId('203846989875'));
-        self::assertSame($item, $api->getOneByLegacyId('203846989875'));
+        $first = $api->getOneByLegacyId('203846989875');
+        $second = $api->getOneByLegacyId('203846989875');
+
+        self::assertSame($item, $first);
+        self::assertSame($item, $second);
     }
 
     public function testGetOneByLegacyIdSkippingCacheThrowsOnEmptyResponse(): void
