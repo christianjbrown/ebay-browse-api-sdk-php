@@ -46,9 +46,14 @@ PSR/PEAR/Squiz/Generic), and **php-cs-fixer** (`@PhpCsFixer`/`@Symfony`) handles
 enough files that PHPStan's parallel workers exhaust the default 128M on a cold cache. There is a
 **GitHub Actions CI workflow** (`.github/workflows/ci.yml`) that runs style, PHPStan and the PHPUnit
 suite with coverage on every push/PR; every dependency is a public GitHub repository, so it needs no
-`COMPOSER_AUTH`. Always run `composer fix-style` first (php-cs-fixer auto-fixes what it can), then
-`composer check-style` to surface any remaining violations that must be fixed by hand, then
-`composer stan` and `composer test` before finishing.
+`COMPOSER_AUTH`. After the coverage run, a final **"Enforce 100% coverage"** step runs
+`./bin/php-coverage-check .phpunit.cache/coverage.txt` (from `christianjbrown/code-quality-scripts`)
+against the text report the previous step wrote, and fails the build if anything is below 100%. Run
+the same two commands locally before pushing:
+`XDEBUG_MODE=coverage php -d memory_limit=-1 ./bin/phpunit --coverage-text=.phpunit.cache/coverage.txt`
+then `./bin/php-coverage-check .phpunit.cache/coverage.txt`. Always run `composer fix-style` first
+(php-cs-fixer auto-fixes what it can), then `composer check-style` to surface any remaining
+violations that must be fixed by hand, then `composer stan` and `composer test` before finishing.
 
 ## Architecture
 
