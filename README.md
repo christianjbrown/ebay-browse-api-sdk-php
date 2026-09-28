@@ -11,8 +11,13 @@ The client is **read-only** and covers the whole public Browse surface. It authe
 | Resource | Client | Endpoint(s) | Returns |
 | --- | --- | --- | --- |
 | Items | `getItemApi()` | `GET /item/{item_id}`, `GET /item/get_item_by_legacy_id`, `GET /item/get_items_by_item_group` | `ItemInterface` / `ItemGroupInterface` |
+| Items (bulk) | `getItemApi()` | `GET /item` | `ItemsResponseInterface` |
 | Item compatibility | `getItemCompatibilityApi()` | `POST /item/{item_id}/check_compatibility` | `CompatibilityResponseInterface` |
 | Item summaries | `getItemSummaryApi()` | `GET /item_summary/search`, `POST /item_summary/search_by_image` | `SearchPagedCollectionInterface` |
+
+:warning: **`getItems()` (`GET /item`) is a [Limited Release](https://developer.ebay.com/api-docs/static/versioning.html#limited) Browse API call, available to select partners only.** It needs an extra OAuth2 scope — `https://api.ebay.com/oauth/api_scope/buy.item.bulk` on top of the application's usual `https://api.ebay.com/oauth/api_scope` — which the client requests for you automatically for this one call; every other call keeps using the plain scope. Calling `getItems()` without that scope granted on your application answers with an authorization error.
+
+`ItemInterface` and `ItemSummaryInterface` now cover eBay's full published field set: `Item` gained `addonServices`, `authenticityGuarantee`, `authenticityVerification`, `availableCoupons`, `charityTerms`, `conditionDescriptors`, `ecoParticipationFee`, `gender`, `hazardousMaterialsLabels`, `inferredEpid`, `manufacturer`, `minimumPriceToBid`, `pattern`, `priceDisplayCondition`, `primaryItemGroup`, `primaryProductReviewRating`, `productFicheWebUrl`, `productSafetyLabels`, `qualifiedPrograms`, `quantityLimitPerBuyer`, `repairScore`, `reservePriceMet`, `responsiblePersons`, `sellerCustomPolicies`, `size`, `sizeSystem`, `sizeType`, `taxes`, `tyreLabelImageUrl` and `watchCount`; `ItemSummary` gained `compatibilityMatch`, `compatibilityProperties`, `distanceFromPickupLocation`, `pickupOptions`, `priceDisplayCondition`, `qualifiedPrograms` and `tyreLabelImageUrl`. `Product`, `PaymentMethod`, `Seller` and `ShippingOption` also gained the remaining fields eBay documents for them (product identities and aspect groups; payment/seller instructions; `userId` and `sellerLegalInfo`; `fulfilledThrough`, `shipToLocationUsedForEstimate` and `trademarkSymbol`).
 
 ## :heavy_check_mark: Prerequisites
 
@@ -119,6 +124,28 @@ foreach ($group->getItems() as $variation) {
     printf("%s — %s\n", $variation->getItemId(), $variation->getTitle());
 }
 ```
+
+### :package: Reading several items at once
+
+`getItems()` (`GET /item`) reads up to 20 items or up to 10 item groups in a single call, given one of `itemIds` or `itemGroupIds` (never both). It is a Limited Release call — see the warning above — and returns only a reduced field set per item (no `title`, `description` or `seller`, for example), so treat every field on the returned items as optional even where a single-item read would guarantee it.
+
+```php
+$itemsResponse = $itemApi->getItems(['v1|123456789012|0', 'v1|234567890123|0']);   // ItemsResponseInterface
+
+foreach ($itemsResponse->getItems() as $item) {
+    printf("%s: %s %s\n", $item->getItemId(), $item->getPrice()?->getValue(), $item->getPrice()?->getCurrency());
+}
+
+printf("%d warnings\n", count($itemsResponse->getWarnings()));
+```
+
+Reading by item group instead:
+
+```php
+$itemsResponse = $itemApi->getItems(itemGroupIds: ['987654321098']);
+```
+
+`quantityForShippingEstimate` is accepted here and by `getOneById()`, `getOneByLegacyId()` and `getMultipleByItemGroupId()`, and is passed straight through as the `quantity_for_shipping_estimate` query parameter.
 
 ### :mag: Searching
 
