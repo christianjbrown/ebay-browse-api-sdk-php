@@ -27,8 +27,8 @@ use function sprintf;
 #[CoversClass(ItemApi::class)]
 final class ItemApiTest extends TestCase
 {
-    private const string ITEM_ID = 'v1|203846989875|0';
-    private const string ITEM_URL = 'https://api.ebay.com/buy/browse/v1/item/v1%7C203846989875%7C0';
+    private const string ITEM_ID = 'v1|123456789012|0';
+    private const string ITEM_URL = 'https://api.ebay.com/buy/browse/v1/item/v1%7C123456789012%7C0';
 
     public function testGetMultipleByItemGroupId(): void
     {
@@ -38,7 +38,7 @@ final class ItemApiTest extends TestCase
         $requestSender->expects(self::once())->method('get')
             ->with(
                 ItemApiInterface::API_URL_ITEMS_BY_ITEM_GROUP,
-                [ItemApiInterface::KEY_ITEM_GROUP_ID => '800318966643'],
+                [ItemApiInterface::KEY_ITEM_GROUP_ID => '987654321098'],
                 self::headers()
             )
             ->willReturn(['group']);
@@ -50,8 +50,8 @@ final class ItemApiTest extends TestCase
 
         $api = self::buildApi($requestSender, self::createStub(ItemTransformerInterface::class), $itemGroupTransformer);
 
-        $first = $api->getMultipleByItemGroupId('800318966643');
-        $second = $api->getMultipleByItemGroupId('800318966643');
+        $first = $api->getMultipleByItemGroupId('987654321098');
+        $second = $api->getMultipleByItemGroupId('987654321098');
 
         self::assertSame($itemGroup, $first);
         self::assertSame($itemGroup, $second);
@@ -67,7 +67,7 @@ final class ItemApiTest extends TestCase
         $this->expectException(UnexpectedResponseException::class);
         $this->expectExceptionMessage(ItemApiInterface::UNEXPECTED_RESPONSE);
 
-        $api->getMultipleByItemGroupId('800318966643', true);
+        $api->getMultipleByItemGroupId('987654321098', true);
     }
 
     public function testGetMultipleByItemGroupIdSkippingCacheThrowsWhenNotFound(): void
@@ -79,7 +79,7 @@ final class ItemApiTest extends TestCase
 
         $this->expectException(ItemNotFoundException::class);
 
-        $api->getMultipleByItemGroupId('800318966643', true);
+        $api->getMultipleByItemGroupId('987654321098', true);
     }
 
     public function testGetMultipleByItemGroupIdSkipsCache(): void
@@ -92,8 +92,8 @@ final class ItemApiTest extends TestCase
 
         $api = self::buildApi($requestSender, self::createStub(ItemTransformerInterface::class), $itemGroupTransformer);
 
-        $api->getMultipleByItemGroupId('800318966643');
-        $api->getMultipleByItemGroupId('800318966643', true);
+        $api->getMultipleByItemGroupId('987654321098');
+        $api->getMultipleByItemGroupId('987654321098', true);
     }
 
     public function testGetMultipleByItemGroupIdThrowsOnEmptyResponse(): void
@@ -106,7 +106,7 @@ final class ItemApiTest extends TestCase
         $this->expectException(UnexpectedResponseException::class);
         $this->expectExceptionMessage(ItemApiInterface::UNEXPECTED_RESPONSE);
 
-        $api->getMultipleByItemGroupId('800318966643');
+        $api->getMultipleByItemGroupId('987654321098');
     }
 
     public function testGetMultipleByItemGroupIdThrowsWhenNotFound(): void
@@ -117,9 +117,9 @@ final class ItemApiTest extends TestCase
         $api = self::buildApi($requestSender, self::createStub(ItemTransformerInterface::class), self::createStub(ItemGroupTransformerInterface::class));
 
         $this->expectException(ItemNotFoundException::class);
-        $this->expectExceptionMessage(sprintf(ItemApiInterface::ITEM_NOT_FOUND_SPRINTF, '800318966643'));
+        $this->expectExceptionMessage(sprintf(ItemApiInterface::ITEM_NOT_FOUND_SPRINTF, '987654321098'));
 
-        $api->getMultipleByItemGroupId('800318966643');
+        $api->getMultipleByItemGroupId('987654321098');
     }
 
     public function testGetOneById(): void
@@ -249,7 +249,7 @@ final class ItemApiTest extends TestCase
         $requestSender->expects(self::once())->method('get')
             ->with(
                 ItemApiInterface::API_URL_ITEM_BY_LEGACY_ID,
-                [ItemApiInterface::KEY_LEGACY_ITEM_ID => '203846989875'],
+                [ItemApiInterface::KEY_LEGACY_ITEM_ID => '123456789012'],
                 self::headers()
             )
             ->willReturn(['item']);
@@ -259,8 +259,8 @@ final class ItemApiTest extends TestCase
 
         $api = self::buildApi($requestSender, $itemTransformer, self::createStub(ItemGroupTransformerInterface::class));
 
-        $first = $api->getOneByLegacyId('203846989875');
-        $second = $api->getOneByLegacyId('203846989875');
+        $first = $api->getOneByLegacyId('123456789012');
+        $second = $api->getOneByLegacyId('123456789012');
 
         self::assertSame($item, $first);
         self::assertSame($item, $second);
@@ -276,7 +276,7 @@ final class ItemApiTest extends TestCase
         $this->expectException(UnexpectedResponseException::class);
         $this->expectExceptionMessage(ItemApiInterface::UNEXPECTED_RESPONSE);
 
-        $api->getOneByLegacyId('203846989875', null, null, null, true);
+        $api->getOneByLegacyId('123456789012', null, null, null, true);
     }
 
     public function testGetOneByLegacyIdSkippingCacheThrowsWhenNotFound(): void
@@ -288,7 +288,7 @@ final class ItemApiTest extends TestCase
 
         $this->expectException(ItemNotFoundException::class);
 
-        $api->getOneByLegacyId('203846989875', null, null, null, true);
+        $api->getOneByLegacyId('123456789012', null, null, null, true);
     }
 
     public function testGetOneByLegacyIdSkipsCache(): void
@@ -301,8 +301,8 @@ final class ItemApiTest extends TestCase
 
         $api = self::buildApi($requestSender, $itemTransformer, self::createStub(ItemGroupTransformerInterface::class));
 
-        $api->getOneByLegacyId('203846989875');
-        $api->getOneByLegacyId('203846989875', null, null, null, true);
+        $api->getOneByLegacyId('123456789012');
+        $api->getOneByLegacyId('123456789012', null, null, null, true);
     }
 
     public function testGetOneByLegacyIdThrowsOnEmptyResponse(): void
@@ -315,7 +315,7 @@ final class ItemApiTest extends TestCase
         $this->expectException(UnexpectedResponseException::class);
         $this->expectExceptionMessage(ItemApiInterface::UNEXPECTED_RESPONSE);
 
-        $api->getOneByLegacyId('203846989875');
+        $api->getOneByLegacyId('123456789012');
     }
 
     public function testGetOneByLegacyIdThrowsWhenNotFound(): void
@@ -326,9 +326,9 @@ final class ItemApiTest extends TestCase
         $api = self::buildApi($requestSender, self::createStub(ItemTransformerInterface::class), self::createStub(ItemGroupTransformerInterface::class));
 
         $this->expectException(ItemNotFoundException::class);
-        $this->expectExceptionMessage(sprintf(ItemApiInterface::ITEM_NOT_FOUND_SPRINTF, '203846989875'));
+        $this->expectExceptionMessage(sprintf(ItemApiInterface::ITEM_NOT_FOUND_SPRINTF, '123456789012'));
 
-        $api->getOneByLegacyId('203846989875');
+        $api->getOneByLegacyId('123456789012');
     }
 
     public function testGetOneByLegacyIdWithEveryOptionalParameter(): void
@@ -340,7 +340,7 @@ final class ItemApiTest extends TestCase
             ->with(
                 ItemApiInterface::API_URL_ITEM_BY_LEGACY_ID,
                 [
-                    ItemApiInterface::KEY_LEGACY_ITEM_ID => '203846989875',
+                    ItemApiInterface::KEY_LEGACY_ITEM_ID => '123456789012',
                     ItemApiInterface::KEY_LEGACY_VARIATION_ID => '654321',
                     ItemApiInterface::KEY_LEGACY_VARIATION_SKU => 'sku-1',
                     ItemApiInterface::KEY_FIELDGROUPS => 'PRODUCT',
@@ -354,7 +354,7 @@ final class ItemApiTest extends TestCase
 
         $api = self::buildApi($requestSender, $itemTransformer, self::createStub(ItemGroupTransformerInterface::class));
 
-        self::assertSame($item, $api->getOneByLegacyId('203846989875', '654321', 'sku-1', 'PRODUCT'));
+        self::assertSame($item, $api->getOneByLegacyId('123456789012', '654321', 'sku-1', 'PRODUCT'));
     }
 
     private static function badResponse(int $statusCode): BadResponseExceptionInterface

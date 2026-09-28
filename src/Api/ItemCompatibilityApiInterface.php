@@ -17,7 +17,7 @@ interface ItemCompatibilityApiInterface extends ApiInterface
     public const string UNEXPECTED_RESPONSE = 'Response not set or not an array';
 
     /**
-     * @param string                $itemId                  The Browse API item id, e.g. `v1|203846989875|0`
+     * @param string                $itemId                  The Browse API item id, e.g. `v1|123456789012|0`
      * @param array<string, string> $compatibilityProperties Aspect name => value, e.g. `['Year' => '2016', 'Make' => 'Honda']`
      */
     public function check(string $itemId, array $compatibilityProperties): CompatibilityResponseInterface;

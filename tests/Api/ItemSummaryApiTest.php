@@ -29,7 +29,7 @@ final class ItemSummaryApiTest extends TestCase
                 [
                     ItemSummaryApiInterface::KEY_LIMIT => '50',
                     ItemSummaryApiInterface::KEY_OFFSET => '0',
-                    ItemSummaryApiInterface::KEY_Q => 'nhs volunteer pin badge',
+                    ItemSummaryApiInterface::KEY_Q => 'vintage film camera',
                 ],
                 self::headers()
             )
@@ -42,8 +42,8 @@ final class ItemSummaryApiTest extends TestCase
 
         $api = self::buildApi($requestSender, $transformer);
 
-        $first = $api->search('nhs volunteer pin badge');
-        $second = $api->search('nhs volunteer pin badge');
+        $first = $api->search('vintage film camera');
+        $second = $api->search('vintage film camera');
 
         self::assertSame($collection, $first);
         self::assertSame($collection, $second);
@@ -61,8 +61,8 @@ final class ItemSummaryApiTest extends TestCase
                     ItemSummaryApiInterface::KEY_LIMIT => '10',
                     ItemSummaryApiInterface::KEY_OFFSET => '20',
                     ItemSummaryApiInterface::KEY_CHARITY_IDS => '13-1788491',
-                    ItemSummaryApiInterface::KEY_CATEGORY_IDS => '60605',
-                    ItemSummaryApiInterface::KEY_ASPECT_FILTER => 'categoryId:60605,Material:{Enamel}',
+                    ItemSummaryApiInterface::KEY_CATEGORY_IDS => '15230',
+                    ItemSummaryApiInterface::KEY_ASPECT_FILTER => 'categoryId:15230,Format:{35mm}',
                     ItemSummaryApiInterface::KEY_FILTER => 'buyingOptions:{FIXED_PRICE}',
                     ItemSummaryApiInterface::KEY_SORT => 'price',
                     ItemSummaryApiInterface::KEY_FIELDGROUPS => 'EXTENDED',
@@ -82,8 +82,8 @@ final class ItemSummaryApiTest extends TestCase
         $actual = $api->searchByImage(
             'dGVzdC1pbWFnZQ==',
             '13-1788491',
-            '60605',
-            'categoryId:60605,Material:{Enamel}',
+            '15230',
+            'categoryId:15230,Format:{35mm}',
             'buyingOptions:{FIXED_PRICE}',
             'price',
             'EXTENDED',
@@ -127,7 +127,7 @@ final class ItemSummaryApiTest extends TestCase
         $this->expectException(UnexpectedResponseException::class);
         $this->expectExceptionMessage(ItemSummaryApiInterface::UNEXPECTED_RESPONSE);
 
-        $api->search('badge', null, null, null, null, null, null, null, null, null, null, 50, 0, true);
+        $api->search('camera', null, null, null, null, null, null, null, null, null, null, 50, 0, true);
     }
 
     public function testSearchSkipsCache(): void
@@ -140,8 +140,8 @@ final class ItemSummaryApiTest extends TestCase
 
         $api = self::buildApi($requestSender, $transformer);
 
-        $api->search('badge');
-        $api->search('badge', null, null, null, null, null, null, null, null, null, null, 50, 0, true);
+        $api->search('camera');
+        $api->search('camera', null, null, null, null, null, null, null, null, null, null, 50, 0, true);
     }
 
     public function testSearchThrowsOnEmptyResponse(): void
@@ -154,7 +154,7 @@ final class ItemSummaryApiTest extends TestCase
         $this->expectException(UnexpectedResponseException::class);
         $this->expectExceptionMessage(ItemSummaryApiInterface::UNEXPECTED_RESPONSE);
 
-        $api->search('badge');
+        $api->search('camera');
     }
 
     public function testSearchWithEveryOptionalParameter(): void
@@ -168,12 +168,12 @@ final class ItemSummaryApiTest extends TestCase
                 [
                     ItemSummaryApiInterface::KEY_LIMIT => '25',
                     ItemSummaryApiInterface::KEY_OFFSET => '50',
-                    ItemSummaryApiInterface::KEY_Q => 'badge',
+                    ItemSummaryApiInterface::KEY_Q => 'camera',
                     ItemSummaryApiInterface::KEY_GTIN => '00190198054180',
                     ItemSummaryApiInterface::KEY_CHARITY_IDS => '13-1788491',
-                    ItemSummaryApiInterface::KEY_CATEGORY_IDS => '60605',
+                    ItemSummaryApiInterface::KEY_CATEGORY_IDS => '15230',
                     ItemSummaryApiInterface::KEY_EPID => '241986',
-                    ItemSummaryApiInterface::KEY_ASPECT_FILTER => 'categoryId:60605,Material:{Enamel}',
+                    ItemSummaryApiInterface::KEY_ASPECT_FILTER => 'categoryId:15230,Format:{35mm}',
                     ItemSummaryApiInterface::KEY_COMPATIBILITY_FILTER => 'Year:2016;Make:Honda',
                     ItemSummaryApiInterface::KEY_FILTER => 'buyingOptions:{FIXED_PRICE}',
                     ItemSummaryApiInterface::KEY_SORT => '-price',
@@ -190,12 +190,12 @@ final class ItemSummaryApiTest extends TestCase
         $api = self::buildApi($requestSender, $transformer);
 
         $actual = $api->search(
-            'badge',
+            'camera',
             '00190198054180',
             '13-1788491',
-            '60605',
+            '15230',
             '241986',
-            'categoryId:60605,Material:{Enamel}',
+            'categoryId:15230,Format:{35mm}',
             'Year:2016;Make:Honda',
             'buyingOptions:{FIXED_PRICE}',
             '-price',
