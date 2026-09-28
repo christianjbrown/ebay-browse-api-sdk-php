@@ -8,6 +8,7 @@ use ChristianBrown\ApiClient\ApiClient;
 use ChristianBrown\ApiClient\JsonApiRequestSenderInterface;
 use ChristianBrown\EBay\Browse\Auth\Credentials;
 use ChristianBrown\EBay\Browse\BrowseInterface;
+use ChristianBrown\EBay\Browse\Http\ApiHostInterface;
 use ChristianBrown\EBay\Browse\MarketplaceInterface;
 use ChristianBrown\KeyValueStore\TtlAwareKeyValueStoreInterface;
 use ChristianBrown\OAuth2Client\ClientCredentialsTokenManager;
@@ -18,16 +19,18 @@ use Symfony\Component\DependencyInjection\Reference;
 final class CoreServiceRegistrar implements CoreServiceRegistrarInterface
 {
     private TtlAwareKeyValueStoreInterface $accessTokenStore;
+    private ApiHostInterface $apiHost;
     private string $clientId;
     private string $clientSecret;
     private MarketplaceInterface $marketplace;
 
-    public function __construct(string $clientId, string $clientSecret, MarketplaceInterface $marketplace, TtlAwareKeyValueStoreInterface $accessTokenStore)
+    public function __construct(string $clientId, string $clientSecret, MarketplaceInterface $marketplace, TtlAwareKeyValueStoreInterface $accessTokenStore, ApiHostInterface $apiHost)
     {
         $this->clientId = $clientId;
         $this->clientSecret = $clientSecret;
         $this->marketplace = $marketplace;
         $this->accessTokenStore = $accessTokenStore;
+        $this->apiHost = $apiHost;
     }
 
     public function register(ContainerBuilder $container): void
@@ -43,7 +46,7 @@ final class CoreServiceRegistrar implements CoreServiceRegistrarInterface
                     $container->getDefinition(BrowseInterface::SERVICE_JSON_API_REQUEST_SENDER),
                     $this->accessTokenStore,
                     $container->getDefinition(BrowseInterface::SERVICE_ACCESS_TOKEN_TRANSFORMER),
-                    BrowseInterface::OAUTH_TOKEN_URL,
+                    $this->apiHost->oauthTokenUrl(),
                 ]
             );
 

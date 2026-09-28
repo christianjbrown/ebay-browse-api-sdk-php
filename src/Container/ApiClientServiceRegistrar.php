@@ -8,10 +8,18 @@ use ChristianBrown\EBay\Browse\Api\ItemApi;
 use ChristianBrown\EBay\Browse\Api\ItemCompatibilityApi;
 use ChristianBrown\EBay\Browse\Api\ItemSummaryApi;
 use ChristianBrown\EBay\Browse\BrowseInterface;
+use ChristianBrown\EBay\Browse\Http\ApiHostInterface;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
 
 final class ApiClientServiceRegistrar implements ApiClientServiceRegistrarInterface
 {
+    private ApiHostInterface $apiHost;
+
+    public function __construct(ApiHostInterface $apiHost)
+    {
+        $this->apiHost = $apiHost;
+    }
+
     public function register(ContainerBuilder $container): void
     {
         $container->register(BrowseInterface::SERVICE_ITEM_API, ItemApi::class)
@@ -21,6 +29,7 @@ final class ApiClientServiceRegistrar implements ApiClientServiceRegistrarInterf
                     $container->getDefinition(BrowseInterface::SERVICE_ITEM_TRANSFORMER),
                     $container->getDefinition(BrowseInterface::SERVICE_ITEM_GROUP_TRANSFORMER),
                     $container->getDefinition(BrowseInterface::SERVICE_CREDENTIALS),
+                    $this->apiHost,
                 ]
             );
 
@@ -30,6 +39,7 @@ final class ApiClientServiceRegistrar implements ApiClientServiceRegistrarInterf
                     $container->getDefinition(BrowseInterface::SERVICE_JSON_API_REQUEST_SENDER),
                     $container->getDefinition(BrowseInterface::SERVICE_COMPATIBILITY_RESPONSE_TRANSFORMER),
                     $container->getDefinition(BrowseInterface::SERVICE_CREDENTIALS),
+                    $this->apiHost,
                 ]
             );
 
@@ -39,6 +49,7 @@ final class ApiClientServiceRegistrar implements ApiClientServiceRegistrarInterf
                     $container->getDefinition(BrowseInterface::SERVICE_JSON_API_REQUEST_SENDER),
                     $container->getDefinition(BrowseInterface::SERVICE_SEARCH_PAGED_COLLECTION_TRANSFORMER),
                     $container->getDefinition(BrowseInterface::SERVICE_CREDENTIALS),
+                    $this->apiHost,
                 ]
             );
     }

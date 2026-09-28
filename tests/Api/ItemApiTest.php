@@ -12,6 +12,7 @@ use ChristianBrown\EBay\Browse\Api\ItemApiInterface;
 use ChristianBrown\EBay\Browse\Auth\CredentialsInterface;
 use ChristianBrown\EBay\Browse\Exception\ItemNotFoundException;
 use ChristianBrown\EBay\Browse\Exception\UnexpectedResponseException;
+use ChristianBrown\EBay\Browse\Http\ApiHost;
 use ChristianBrown\EBay\Browse\Model\ItemGroupInterface;
 use ChristianBrown\EBay\Browse\Model\ItemInterface;
 use ChristianBrown\EBay\Browse\Transformer\ItemGroupTransformerInterface;
@@ -20,11 +21,13 @@ use GuzzleHttp\Exception\BadResponseException as GuzzleBadResponseException;
 use GuzzleHttp\Psr7\Request;
 use GuzzleHttp\Psr7\Response;
 use PHPUnit\Framework\Attributes\CoversClass;
+use PHPUnit\Framework\Attributes\UsesClass;
 use PHPUnit\Framework\TestCase;
 
 use function sprintf;
 
 #[CoversClass(ItemApi::class)]
+#[UsesClass(ApiHost::class)]
 final class ItemApiTest extends TestCase
 {
     private const string ITEM_ID = 'v1|123456789012|0';
@@ -370,7 +373,7 @@ final class ItemApiTest extends TestCase
         $credentials = self::createStub(CredentialsInterface::class);
         $credentials->method('toHeaders')->willReturn(self::headers());
 
-        return new ItemApi($requestSender, $itemTransformer, $itemGroupTransformer, $credentials);
+        return new ItemApi($requestSender, $itemTransformer, $itemGroupTransformer, $credentials, ApiHost::production());
     }
 
     /**

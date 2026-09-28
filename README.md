@@ -36,12 +36,13 @@ The Browse API authenticates every request with an **application access token** 
 
 Every request also carries a **marketplace id** (`X-EBAY-C-MARKETPLACE-ID`), which decides the site the data comes from and the currency prices are quoted in. That, plus the optional `X-EBAY-C-ENDUSERCTX` and `Accept-Language` headers, lives in a small `Marketplace` value object.
 
-You supply four things to the `Browse` entry point:
+You supply four things to the `Browse` entry point, plus an optional fifth:
 
 - your app's **client id**,
 - your app's **client secret**,
 - a **`MarketplaceInterface`** naming the marketplace to read,
-- a **`TtlAwareKeyValueStoreInterface`** to hold the current access token (an in-memory store is fine — tokens last two hours and are re-fetched as needed; a shared store just saves round-trips).
+- a **`TtlAwareKeyValueStoreInterface`** to hold the current access token (an in-memory store is fine — tokens last two hours and are re-fetched as needed; a shared store just saves round-trips),
+- optionally, an **`ApiHostInterface`** naming which eBay environment to call (see [Overriding the API host](#satellite-overriding-the-api-host)); production is the default.
 
 ```php
 use ChristianBrown\EBay\Browse\Browse;
@@ -60,6 +61,30 @@ $itemApi = $browse->getItemApi();                    // ItemApiInterface
 $itemSummaryApi = $browse->getItemSummaryApi();      // ItemSummaryApiInterface
 $compatibilityApi = $browse->getItemCompatibilityApi(); // ItemCompatibilityApiInterface
 ```
+
+### :satellite: Overriding the API host
+
+Every request, including the OAuth2 token exchange, goes to eBay's production host by default. To
+point the client at eBay's sandbox instead, pass `ApiHost::sandbox()` as the fifth argument:
+
+```php
+use ChristianBrown\EBay\Browse\Browse;
+use ChristianBrown\EBay\Browse\Http\ApiHost;
+
+$browse = new Browse(
+    'your-sandbox-client-id',
+    'your-sandbox-client-secret',
+    new Marketplace(MarketplaceId::EBAY_GB),
+    new MemoryKeyValueStore(),
+    ApiHost::sandbox()
+);
+```
+
+eBay runs the Buy APIs, including Browse, through a different sandbox gateway host than the rest of
+the platform: `ApiHost::sandbox()` calls the Browse API on `apiz.sandbox.ebay.com` and the OAuth2
+token endpoint on `api.sandbox.ebay.com`. `ApiHost::production()` is the default and calls both on
+`api.ebay.com`. For any other host (a proxy, a mock server in tests), construct `new
+ApiHost($browseApiBaseUrl, $oauthTokenUrl)` directly.
 
 ### :package: Reading one item
 
@@ -188,14 +213,14 @@ Under the hood, `Browse` wires the clients, their transformer chains, and the OA
 <details id="wiring-the-clients">
 <summary><strong>Wiring the clients</strong></summary>
 
-Every client takes a request sender, its transformer chain and a `CredentialsInterface`. The credentials are the same for all three, so they are built once:
+Every client takes a request sender, its transformer chain, a `CredentialsInterface` and an `ApiHostInterface`. The credentials and the host are the same for all three, so they are built once:
 
 ```php
 use ChristianBrown\ApiClient\ApiClient;
 use ChristianBrown\EBay\Browse\Auth\ApplicationAccessTokenTransformer;
 use ChristianBrown\EBay\Browse\Auth\Credentials;
-use ChristianBrown\EBay\Browse\BrowseInterface;
 use ChristianBrown\EBay\Browse\Enums\MarketplaceId;
+use ChristianBrown\EBay\Browse\Http\ApiHost;
 use ChristianBrown\EBay\Browse\Marketplace;
 use ChristianBrown\KeyValueStore\MemoryKeyValueStore;
 use ChristianBrown\OAuth2Client\ClientCredentialsTokenManager;
@@ -204,6 +229,10 @@ use ChristianBrown\OAuth2Client\Transformer\AccessTokenTransformer;
 // Shared JSON request sender (wires Guzzle for you).
 $requestSender = (new ApiClient())->getJsonApiRequestSender();
 
+// ApiHost::production() talks to api.ebay.com; ApiHost::sandbox() switches
+// every client and the token exchange below to eBay's sandbox gateway.
+$apiHost = ApiHost::production();
+
 // OAuth2 client-credentials machinery. The extra token transformer rewrites
 // eBay's non-standard `token_type: "Application Access Token"` to `Bearer`
 // before the shared OAuth2 transformer, which only knows `Bearer`, sees it.
@@ -211,7 +240,7 @@ $tokenManager = new ClientCredentialsTokenManager(
     $requestSender,
     new MemoryKeyValueStore(),
     new ApplicationAccessTokenTransformer(new AccessTokenTransformer()),
-    BrowseInterface::OAUTH_TOKEN_URL
+    $apiHost->oauthTokenUrl()
 );
 
 $credentials = new Credentials(
@@ -243,11 +272,12 @@ $errorsTransformer = new ErrorsTransformer(
 $compatibilityApi = new ItemCompatibilityApi(
     $requestSender,
     new CompatibilityResponseTransformer($errorsTransformer),
-    $credentials
+    $credentials,
+    $apiHost
 );
 ```
 
-`ItemTransformer` and `ItemSummaryTransformer` take the same treatment with a longer constructor — read the argument list off the class and hand each nested transformer in, in order. The `Browse` facade's `registerLeafTransformers()` and `registerComposedTransformers()` are the canonical wiring if you need a reference.
+`ItemTransformer` and `ItemSummaryTransformer` take the same treatment with a longer constructor — read the argument list off the class and hand each nested transformer in, in order. `ItemApi` and `ItemSummaryApi` take the same `$requestSender`, their own transformer chain, `$credentials` and `$apiHost` as their last argument, same as `ItemCompatibilityApi` above. The `Browse` facade's registrars under `src/Container/` (`LeafTransformerServiceRegistrar`, `ComposedTransformerServiceRegistrar`, `ApiClientServiceRegistrar`) are the canonical wiring if you need a reference.
 
 </details>
 

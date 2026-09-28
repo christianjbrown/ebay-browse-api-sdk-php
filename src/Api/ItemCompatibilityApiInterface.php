@@ -14,6 +14,12 @@ interface ItemCompatibilityApiInterface extends ApiInterface
     public const string KEY_NAME = 'name';
     public const string KEY_VALUE = 'value';
     public const string MISSING_COMPATIBILITY_PROPERTIES = 'At least one compatibility property is required';
+
+    /**
+     * Relative to ApiHostInterface::browseApiUrl(); resolves to
+     * self::API_URL_SPRINTF against the production host.
+     */
+    public const string PATH_SPRINTF = '/item/%s/check_compatibility';
     public const string UNEXPECTED_RESPONSE = 'Response not set or not an array';
 
     /**

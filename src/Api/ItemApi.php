@@ -10,6 +10,7 @@ use ChristianBrown\ApiClient\JsonApiRequestSenderInterface;
 use ChristianBrown\EBay\Browse\Auth\CredentialsInterface;
 use ChristianBrown\EBay\Browse\Exception\ItemNotFoundException;
 use ChristianBrown\EBay\Browse\Exception\UnexpectedResponseException;
+use ChristianBrown\EBay\Browse\Http\ApiHostInterface;
 use ChristianBrown\EBay\Browse\Model\ItemGroupInterface;
 use ChristianBrown\EBay\Browse\Model\ItemInterface;
 use ChristianBrown\EBay\Browse\Transformer\ItemGroupTransformerInterface;
@@ -23,6 +24,7 @@ use function sprintf;
 
 final class ItemApi implements ItemApiInterface
 {
+    private ApiHostInterface $apiHost;
     private CredentialsInterface $credentials;
 
     /**
@@ -43,12 +45,13 @@ final class ItemApi implements ItemApiInterface
     private array $oneCache = [];
     private JsonApiRequestSenderInterface $requestSender;
 
-    public function __construct(JsonApiRequestSenderInterface $requestSender, ItemTransformerInterface $itemTransformer, ItemGroupTransformerInterface $itemGroupTransformer, CredentialsInterface $credentials)
+    public function __construct(JsonApiRequestSenderInterface $requestSender, ItemTransformerInterface $itemTransformer, ItemGroupTransformerInterface $itemGroupTransformer, CredentialsInterface $credentials, ApiHostInterface $apiHost)
     {
         $this->requestSender = $requestSender;
         $this->itemTransformer = $itemTransformer;
         $this->itemGroupTransformer = $itemGroupTransformer;
         $this->credentials = $credentials;
+        $this->apiHost = $apiHost;
     }
 
     /**
@@ -67,7 +70,7 @@ final class ItemApi implements ItemApiInterface
         $query = [self::KEY_ITEM_GROUP_ID => $itemGroupId];
 
         try {
-            $data = $this->requestSender->get(self::API_URL_ITEMS_BY_ITEM_GROUP, $query, $this->credentials->toHeaders());
+            $data = $this->requestSender->get($this->apiHost->browseApiUrl(self::PATH_ITEMS_BY_ITEM_GROUP), $query, $this->credentials->toHeaders());
         } catch (BadResponseExceptionInterface $exception) {
             throw self::mapNotFound($exception, $itemGroupId);
         }
@@ -98,7 +101,7 @@ final class ItemApi implements ItemApiInterface
 
         // The Browse API's item id contains pipes, so it has to be escaped
         // before it is interpolated into the path.
-        $url = sprintf(self::API_URL_ITEM_SPRINTF, rawurlencode($itemId));
+        $url = sprintf($this->apiHost->browseApiUrl(self::PATH_ITEM_SPRINTF), rawurlencode($itemId));
 
         try {
             $data = $this->requestSender->get($url, $query, $this->credentials->toHeaders());
@@ -131,7 +134,7 @@ final class ItemApi implements ItemApiInterface
         }
 
         try {
-            $data = $this->requestSender->get(self::API_URL_ITEM_BY_LEGACY_ID, $query, $this->credentials->toHeaders());
+            $data = $this->requestSender->get($this->apiHost->browseApiUrl(self::PATH_ITEM_BY_LEGACY_ID), $query, $this->credentials->toHeaders());
         } catch (BadResponseExceptionInterface $exception) {
             throw self::mapNotFound($exception, $legacyItemId);
         }

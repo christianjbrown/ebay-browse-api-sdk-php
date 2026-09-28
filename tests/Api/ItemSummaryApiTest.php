@@ -10,12 +10,15 @@ use ChristianBrown\EBay\Browse\Api\ItemSummaryApiInterface;
 use ChristianBrown\EBay\Browse\Auth\CredentialsInterface;
 use ChristianBrown\EBay\Browse\Exception\MissingInputException;
 use ChristianBrown\EBay\Browse\Exception\UnexpectedResponseException;
+use ChristianBrown\EBay\Browse\Http\ApiHost;
 use ChristianBrown\EBay\Browse\Model\SearchPagedCollectionInterface;
 use ChristianBrown\EBay\Browse\Transformer\SearchPagedCollectionTransformerInterface;
 use PHPUnit\Framework\Attributes\CoversClass;
+use PHPUnit\Framework\Attributes\UsesClass;
 use PHPUnit\Framework\TestCase;
 
 #[CoversClass(ItemSummaryApi::class)]
+#[UsesClass(ApiHost::class)]
 final class ItemSummaryApiTest extends TestCase
 {
     public function testSearch(): void
@@ -213,7 +216,7 @@ final class ItemSummaryApiTest extends TestCase
         $credentials = self::createStub(CredentialsInterface::class);
         $credentials->method('toHeaders')->willReturn(self::headers());
 
-        return new ItemSummaryApi($requestSender, $searchPagedCollectionTransformer, $credentials);
+        return new ItemSummaryApi($requestSender, $searchPagedCollectionTransformer, $credentials, ApiHost::production());
     }
 
     /**

@@ -9,6 +9,7 @@ use ChristianBrown\ApiClient\JsonApiRequestSenderInterface;
 use ChristianBrown\EBay\Browse\Auth\CredentialsInterface;
 use ChristianBrown\EBay\Browse\Exception\MissingInputException;
 use ChristianBrown\EBay\Browse\Exception\UnexpectedResponseException;
+use ChristianBrown\EBay\Browse\Http\ApiHostInterface;
 use ChristianBrown\EBay\Browse\Model\SearchPagedCollectionInterface;
 use ChristianBrown\EBay\Browse\Transformer\SearchPagedCollectionTransformerInterface;
 
@@ -17,6 +18,8 @@ use function http_build_query;
 
 final class ItemSummaryApi implements ItemSummaryApiInterface
 {
+    private ApiHostInterface $apiHost;
+
     /**
      * @var array<string, SearchPagedCollectionInterface>
      */
@@ -25,11 +28,12 @@ final class ItemSummaryApi implements ItemSummaryApiInterface
     private JsonApiRequestSenderInterface $requestSender;
     private SearchPagedCollectionTransformerInterface $searchPagedCollectionTransformer;
 
-    public function __construct(JsonApiRequestSenderInterface $requestSender, SearchPagedCollectionTransformerInterface $searchPagedCollectionTransformer, CredentialsInterface $credentials)
+    public function __construct(JsonApiRequestSenderInterface $requestSender, SearchPagedCollectionTransformerInterface $searchPagedCollectionTransformer, CredentialsInterface $credentials, ApiHostInterface $apiHost)
     {
         $this->requestSender = $requestSender;
         $this->searchPagedCollectionTransformer = $searchPagedCollectionTransformer;
         $this->credentials = $credentials;
+        $this->apiHost = $apiHost;
     }
 
     /**
@@ -46,7 +50,7 @@ final class ItemSummaryApi implements ItemSummaryApiInterface
             }
         }
 
-        $data = $this->requestSender->get(self::API_URL_SEARCH, $query, $this->credentials->toHeaders());
+        $data = $this->requestSender->get($this->apiHost->browseApiUrl(self::PATH_SEARCH), $query, $this->credentials->toHeaders());
 
         if (empty($data)) {
             throw new UnexpectedResponseException(self::UNEXPECTED_RESPONSE);
@@ -74,7 +78,7 @@ final class ItemSummaryApi implements ItemSummaryApiInterface
         // search minus the keyword-only ones, which are passed as null here.
         $query = self::buildQuery(null, null, $charityIds, $categoryIds, null, $aspectFilter, null, $filter, $sort, $fieldgroups, null, $limit, $offset);
         $body = [self::KEY_IMAGE => $image];
-        $data = $this->requestSender->post(self::API_URL_SEARCH_BY_IMAGE, $query, $this->credentials->toHeaders(), $body);
+        $data = $this->requestSender->post($this->apiHost->browseApiUrl(self::PATH_SEARCH_BY_IMAGE), $query, $this->credentials->toHeaders(), $body);
 
         if (empty($data)) {
             throw new UnexpectedResponseException(self::UNEXPECTED_RESPONSE);

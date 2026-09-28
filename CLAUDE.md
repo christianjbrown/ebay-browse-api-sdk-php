@@ -62,12 +62,25 @@ Layers under `src/`, mirrored 1:1 under `tests/`, plus the top-level `Browse` fa
 StudlyCase `EBay`.
 
 - **`Browse`** (`src/Browse.php`) — the facade/entry point. Constructed with a client id, a client
-  secret, a `MarketplaceInterface` and a `TtlAwareKeyValueStoreInterface` for the access token, it
-  builds a Symfony `ContainerBuilder`, registers every transformer and client as a service (ids on
-  `BrowseInterface` as `SERVICE_*` constants), and exposes `getItemApi()`,
-  `getItemCompatibilityApi()` and `getItemSummaryApi()`. `init()` registers in dependency order:
-  `registerCore()`, `registerLeafTransformers()`, `registerComposedTransformers()`,
-  `registerApiClients()` — a service must exist before another references its definition.
+  secret, a `MarketplaceInterface`, a `TtlAwareKeyValueStoreInterface` for the access token and an
+  optional `ApiHostInterface` (defaults to `ApiHost::production()`), it builds a list of
+  `ServiceRegistrarInterface` registrars and hands them to a `ContainerFactory`
+  (`src/Container/ContainerFactory.php`), which runs each in order against one Symfony
+  `ContainerBuilder` and returns it. Service ids live on `BrowseInterface` as `SERVICE_*` constants.
+  `Browse` exposes `getItemApi()`, `getItemCompatibilityApi()` and `getItemSummaryApi()` by asking
+  the built container for those services. The registrars, under `src/Container/`, run in dependency
+  order — a service must exist before another registrar references its definition:
+  `CoreServiceRegistrar` (credentials and the OAuth2 machinery), `LeafTransformerServiceRegistrar`,
+  `ComposedTransformerServiceRegistrar`, then `ApiClientServiceRegistrar`. Adding a new API group
+  means adding one more registrar to the list `Browse` builds, not editing an existing one.
+- **`Http/ApiHost`** (`src/Http/ApiHostInterface.php`, `src/Http/ApiHost.php`) — the value object
+  behind the optional fifth `Browse` constructor argument. `ApiHost::production()` (the default) and
+  `ApiHost::sandbox()` are named constructors; `browseApiUrl(string $path)` and `oauthTokenUrl()` are
+  the two things every `Api` client and `CoreServiceRegistrar` ask it for. The `API_URL_*` constants
+  on `ItemApiInterface`/`ItemSummaryApiInterface`/`ItemCompatibilityApiInterface` and
+  `BrowseInterface::OAUTH_TOKEN_URL` stay for backward compatibility but are no longer read
+  internally — the corresponding `PATH_*` constants on each `Api` interface, resolved through the
+  injected `ApiHostInterface`, are what the clients actually call.
 - **`Marketplace`** (`src/Marketplace.php`) — a small value object holding a `MarketplaceId` enum
   case plus the optional end-user context and `Accept-Language`. `toHeaders()` builds
   `X-EBAY-C-MARKETPLACE-ID`, `X-EBAY-C-ENDUSERCTX` and `Accept-Language`.

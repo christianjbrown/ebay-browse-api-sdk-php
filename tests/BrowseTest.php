@@ -18,6 +18,7 @@ use ChristianBrown\EBay\Browse\Container\ContainerFactory;
 use ChristianBrown\EBay\Browse\Container\CoreServiceRegistrar;
 use ChristianBrown\EBay\Browse\Container\LeafTransformerServiceRegistrar;
 use ChristianBrown\EBay\Browse\Enums\MarketplaceId;
+use ChristianBrown\EBay\Browse\Http\ApiHost;
 use ChristianBrown\EBay\Browse\Marketplace;
 use ChristianBrown\EBay\Browse\Transformer\AspectDistributionsTransformer;
 use ChristianBrown\EBay\Browse\Transformer\AspectDistributionTransformer;
@@ -76,6 +77,7 @@ use PHPUnit\Framework\TestCase;
 
 #[CoversClass(Browse::class)]
 #[UsesClass(ApiClientServiceRegistrar::class)]
+#[UsesClass(ApiHost::class)]
 #[UsesClass(AspectDistributionTransformer::class)]
 #[UsesClass(AspectDistributionsTransformer::class)]
 #[UsesClass(AspectValueDistributionTransformer::class)]
@@ -147,6 +149,13 @@ final class BrowseTest extends TestCase
         $browse = $this->buildBrowse();
 
         self::assertSame($browse->getItemApi(), $browse->getItemApi());
+    }
+
+    public function testItemApiWithAnExplicitApiHost(): void
+    {
+        $browse = new Browse('test-client-id', 'test-client-secret', new Marketplace(MarketplaceId::EBAY_GB), new MemoryKeyValueStore(), ApiHost::sandbox());
+
+        self::assertInstanceOf(ItemApiInterface::class, $browse->getItemApi());
     }
 
     public function testItemCompatibilityApi(): void
