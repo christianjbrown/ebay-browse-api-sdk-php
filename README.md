@@ -1,6 +1,6 @@
 # eBay Browse API SDK
 
-[![CI](https://github.com/christianjbrown/ebay-browse-api-sdk-php/actions/workflows/ci.yml/badge.svg)](https://github.com/christianjbrown/ebay-browse-api-sdk-php/actions/workflows/ci.yml) [![Packagist](https://img.shields.io/packagist/v/christianjbrown/ebay-browse-api-sdk)](https://packagist.org/packages/christianjbrown/ebay-browse-api-sdk)
+[![CI](https://github.com/christianjbrown/ebay-browse-api-sdk-php/actions/workflows/ci.yml/badge.svg)](https://github.com/christianjbrown/ebay-browse-api-sdk-php/actions/workflows/ci.yml) [![Packagist](https://img.shields.io/packagist/v/christianjbrown/ebay-browse-api-sdk)](https://packagist.org/packages/christianjbrown/ebay-browse-api-sdk) [![License](https://img.shields.io/packagist/l/christianjbrown/ebay-browse-api-sdk)](https://github.com/christianjbrown/ebay-browse-api-sdk-php/blob/main/LICENSE) [![PHP](https://img.shields.io/packagist/dependency-v/christianjbrown/ebay-browse-api-sdk/php)](https://packagist.org/packages/christianjbrown/ebay-browse-api-sdk)
 
 A strongly-typed PHP client for the [eBay Browse API](https://developer.ebay.com/api-docs/buy/browse/overview.html). It reads eBay's public listing data — a single item, the items in a multi-variation listing, keyword and image searches, and part compatibility — returning plain, typed model objects rather than raw arrays.
 
