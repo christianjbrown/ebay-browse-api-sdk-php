@@ -25,6 +25,18 @@ interface ItemSummaryApiInterface extends ApiInterface
     public const string KEY_Q = 'q';
     public const string KEY_SORT = 'sort';
     public const string MISSING_IMAGE = 'A base64-encoded image is required';
+
+    /**
+     * Relative to ApiHostInterface::browseApiUrl(); resolves to
+     * self::API_URL_SEARCH against the production host.
+     */
+    public const string PATH_SEARCH = '/item_summary/search';
+
+    /**
+     * Relative to ApiHostInterface::browseApiUrl(); resolves to
+     * self::API_URL_SEARCH_BY_IMAGE against the production host.
+     */
+    public const string PATH_SEARCH_BY_IMAGE = '/item_summary/search_by_image';
     public const string UNEXPECTED_RESPONSE = 'Response not set or not an array';
     public const string VALUE_AUTO_CORRECT_KEYWORD = 'KEYWORD';
 

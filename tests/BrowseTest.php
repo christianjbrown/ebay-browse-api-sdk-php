@@ -12,7 +12,14 @@ use ChristianBrown\EBay\Browse\Api\ItemSummaryApi;
 use ChristianBrown\EBay\Browse\Api\ItemSummaryApiInterface;
 use ChristianBrown\EBay\Browse\Auth\Credentials;
 use ChristianBrown\EBay\Browse\Browse;
+use ChristianBrown\EBay\Browse\Cache\ArrayKeyedCache;
+use ChristianBrown\EBay\Browse\Container\ApiClientServiceRegistrar;
+use ChristianBrown\EBay\Browse\Container\ComposedTransformerServiceRegistrar;
+use ChristianBrown\EBay\Browse\Container\ContainerFactory;
+use ChristianBrown\EBay\Browse\Container\CoreServiceRegistrar;
+use ChristianBrown\EBay\Browse\Container\LeafTransformerServiceRegistrar;
 use ChristianBrown\EBay\Browse\Enums\MarketplaceId;
+use ChristianBrown\EBay\Browse\Http\ApiHost;
 use ChristianBrown\EBay\Browse\Marketplace;
 use ChristianBrown\EBay\Browse\Transformer\AspectDistributionsTransformer;
 use ChristianBrown\EBay\Browse\Transformer\AspectDistributionTransformer;
@@ -70,6 +77,9 @@ use PHPUnit\Framework\Attributes\UsesClass;
 use PHPUnit\Framework\TestCase;
 
 #[CoversClass(Browse::class)]
+#[UsesClass(ApiClientServiceRegistrar::class)]
+#[UsesClass(ApiHost::class)]
+#[UsesClass(ArrayKeyedCache::class)]
 #[UsesClass(AspectDistributionTransformer::class)]
 #[UsesClass(AspectDistributionsTransformer::class)]
 #[UsesClass(AspectValueDistributionTransformer::class)]
@@ -84,9 +94,12 @@ use PHPUnit\Framework\TestCase;
 #[UsesClass(CommonDescriptionTransformer::class)]
 #[UsesClass(CommonDescriptionsTransformer::class)]
 #[UsesClass(CompatibilityResponseTransformer::class)]
+#[UsesClass(ComposedTransformerServiceRegistrar::class)]
 #[UsesClass(ConditionDistributionTransformer::class)]
 #[UsesClass(ConditionDistributionsTransformer::class)]
+#[UsesClass(ContainerFactory::class)]
 #[UsesClass(ConvertedAmountTransformer::class)]
+#[UsesClass(CoreServiceRegistrar::class)]
 #[UsesClass(Credentials::class)]
 #[UsesClass(ErrorParameterTransformer::class)]
 #[UsesClass(ErrorParametersTransformer::class)]
@@ -105,6 +118,7 @@ use PHPUnit\Framework\TestCase;
 #[UsesClass(ItemSummaryTransformer::class)]
 #[UsesClass(ItemTransformer::class)]
 #[UsesClass(ItemsTransformer::class)]
+#[UsesClass(LeafTransformerServiceRegistrar::class)]
 #[UsesClass(MarketingPriceTransformer::class)]
 #[UsesClass(Marketplace::class)]
 #[UsesClass(PaymentMethodBrandTransformer::class)]
@@ -137,6 +151,13 @@ final class BrowseTest extends TestCase
         $browse = $this->buildBrowse();
 
         self::assertSame($browse->getItemApi(), $browse->getItemApi());
+    }
+
+    public function testItemApiWithAnExplicitApiHost(): void
+    {
+        $browse = new Browse('test-client-id', 'test-client-secret', new Marketplace(MarketplaceId::EBAY_GB), new MemoryKeyValueStore(), ApiHost::sandbox());
+
+        self::assertInstanceOf(ItemApiInterface::class, $browse->getItemApi());
     }
 
     public function testItemCompatibilityApi(): void

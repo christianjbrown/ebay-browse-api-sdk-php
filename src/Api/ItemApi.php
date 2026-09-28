@@ -8,8 +8,10 @@ use ChristianBrown\ApiClient\Exception\Request\RequestExceptionInterface;
 use ChristianBrown\ApiClient\Exception\Response\BadResponseExceptionInterface;
 use ChristianBrown\ApiClient\JsonApiRequestSenderInterface;
 use ChristianBrown\EBay\Browse\Auth\CredentialsInterface;
+use ChristianBrown\EBay\Browse\Cache\KeyedCacheInterface;
 use ChristianBrown\EBay\Browse\Exception\ItemNotFoundException;
 use ChristianBrown\EBay\Browse\Exception\UnexpectedResponseException;
+use ChristianBrown\EBay\Browse\Http\ApiHostInterface;
 use ChristianBrown\EBay\Browse\Model\ItemGroupInterface;
 use ChristianBrown\EBay\Browse\Model\ItemInterface;
 use ChristianBrown\EBay\Browse\Transformer\ItemGroupTransformerInterface;
@@ -23,32 +25,47 @@ use function sprintf;
 
 final class ItemApi implements ItemApiInterface
 {
+    private ApiHostInterface $apiHost;
     private CredentialsInterface $credentials;
 
     /**
-     * @var array<string, ItemGroupInterface>
+     * @var KeyedCacheInterface<ItemGroupInterface>
      */
-    private array $itemGroupCache = [];
+    private KeyedCacheInterface $itemGroupCache;
     private ItemGroupTransformerInterface $itemGroupTransformer;
     private ItemTransformerInterface $itemTransformer;
 
     /**
-     * @var array<string, ItemInterface>
+     * @var KeyedCacheInterface<ItemInterface>
      */
-    private array $legacyCache = [];
+    private KeyedCacheInterface $legacyCache;
 
     /**
-     * @var array<string, ItemInterface>
+     * @var KeyedCacheInterface<ItemInterface>
      */
-    private array $oneCache = [];
+    private KeyedCacheInterface $oneCache;
     private JsonApiRequestSenderInterface $requestSender;
 
-    public function __construct(JsonApiRequestSenderInterface $requestSender, ItemTransformerInterface $itemTransformer, ItemGroupTransformerInterface $itemGroupTransformer, CredentialsInterface $credentials)
+    /**
+     * @param JsonApiRequestSenderInterface           $requestSender        Sends every request this client makes
+     * @param ItemTransformerInterface                $itemTransformer      Builds an ItemInterface from raw response data
+     * @param ItemGroupTransformerInterface           $itemGroupTransformer Builds an ItemGroupInterface from raw response data
+     * @param CredentialsInterface                    $credentials          Supplies the auth and marketplace headers
+     * @param ApiHostInterface                        $apiHost              Resolves the Browse API base URL
+     * @param KeyedCacheInterface<ItemInterface>      $oneCache             Keyed by getOneById()'s item id and query string
+     * @param KeyedCacheInterface<ItemInterface>      $legacyCache          Keyed by getOneByLegacyId()'s query string
+     * @param KeyedCacheInterface<ItemGroupInterface> $itemGroupCache       Keyed by getMultipleByItemGroupId()'s item group id
+     */
+    public function __construct(JsonApiRequestSenderInterface $requestSender, ItemTransformerInterface $itemTransformer, ItemGroupTransformerInterface $itemGroupTransformer, CredentialsInterface $credentials, ApiHostInterface $apiHost, KeyedCacheInterface $oneCache, KeyedCacheInterface $legacyCache, KeyedCacheInterface $itemGroupCache)
     {
         $this->requestSender = $requestSender;
         $this->itemTransformer = $itemTransformer;
         $this->itemGroupTransformer = $itemGroupTransformer;
         $this->credentials = $credentials;
+        $this->apiHost = $apiHost;
+        $this->oneCache = $oneCache;
+        $this->legacyCache = $legacyCache;
+        $this->itemGroupCache = $itemGroupCache;
     }
 
     /**
@@ -59,15 +76,15 @@ final class ItemApi implements ItemApiInterface
     public function getMultipleByItemGroupId(string $itemGroupId, bool $skipCache = false): ItemGroupInterface
     {
         if (!$skipCache) {
-            if (isset($this->itemGroupCache[$itemGroupId])) {
-                return $this->itemGroupCache[$itemGroupId];
+            if ($this->itemGroupCache->has($itemGroupId)) {
+                return $this->itemGroupCache->get($itemGroupId);
             }
         }
 
         $query = [self::KEY_ITEM_GROUP_ID => $itemGroupId];
 
         try {
-            $data = $this->requestSender->get(self::API_URL_ITEMS_BY_ITEM_GROUP, $query, $this->credentials->toHeaders());
+            $data = $this->requestSender->get($this->apiHost->browseApiUrl(self::PATH_ITEMS_BY_ITEM_GROUP), $query, $this->credentials->toHeaders());
         } catch (BadResponseExceptionInterface $exception) {
             throw self::mapNotFound($exception, $itemGroupId);
         }
@@ -76,7 +93,7 @@ final class ItemApi implements ItemApiInterface
             throw new UnexpectedResponseException(self::UNEXPECTED_RESPONSE);
         }
         $itemGroup = $this->itemGroupTransformer->transform($data);
-        $this->itemGroupCache[$itemGroupId] = $itemGroup;
+        $this->itemGroupCache->set($itemGroupId, $itemGroup);
 
         return $itemGroup;
     }
@@ -91,14 +108,14 @@ final class ItemApi implements ItemApiInterface
         $query = self::buildFieldgroupsQuery($fieldgroups);
         $cacheKey = sprintf('%s?%s', $itemId, http_build_query($query));
         if (!$skipCache) {
-            if (isset($this->oneCache[$cacheKey])) {
-                return $this->oneCache[$cacheKey];
+            if ($this->oneCache->has($cacheKey)) {
+                return $this->oneCache->get($cacheKey);
             }
         }
 
         // The Browse API's item id contains pipes, so it has to be escaped
         // before it is interpolated into the path.
-        $url = sprintf(self::API_URL_ITEM_SPRINTF, rawurlencode($itemId));
+        $url = sprintf($this->apiHost->browseApiUrl(self::PATH_ITEM_SPRINTF), rawurlencode($itemId));
 
         try {
             $data = $this->requestSender->get($url, $query, $this->credentials->toHeaders());
@@ -110,7 +127,7 @@ final class ItemApi implements ItemApiInterface
             throw new UnexpectedResponseException(self::UNEXPECTED_RESPONSE);
         }
         $item = $this->itemTransformer->transform($data);
-        $this->oneCache[$cacheKey] = $item;
+        $this->oneCache->set($cacheKey, $item);
 
         return $item;
     }
@@ -125,13 +142,13 @@ final class ItemApi implements ItemApiInterface
         $query = self::buildLegacyQuery($legacyItemId, $legacyVariationId, $legacyVariationSku, $fieldgroups);
         $cacheKey = http_build_query($query);
         if (!$skipCache) {
-            if (isset($this->legacyCache[$cacheKey])) {
-                return $this->legacyCache[$cacheKey];
+            if ($this->legacyCache->has($cacheKey)) {
+                return $this->legacyCache->get($cacheKey);
             }
         }
 
         try {
-            $data = $this->requestSender->get(self::API_URL_ITEM_BY_LEGACY_ID, $query, $this->credentials->toHeaders());
+            $data = $this->requestSender->get($this->apiHost->browseApiUrl(self::PATH_ITEM_BY_LEGACY_ID), $query, $this->credentials->toHeaders());
         } catch (BadResponseExceptionInterface $exception) {
             throw self::mapNotFound($exception, $legacyItemId);
         }
@@ -140,7 +157,7 @@ final class ItemApi implements ItemApiInterface
             throw new UnexpectedResponseException(self::UNEXPECTED_RESPONSE);
         }
         $item = $this->itemTransformer->transform($data);
-        $this->legacyCache[$cacheKey] = $item;
+        $this->legacyCache->set($cacheKey, $item);
 
         return $item;
     }

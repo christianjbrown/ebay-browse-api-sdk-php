@@ -46,9 +46,14 @@ PSR/PEAR/Squiz/Generic), and **php-cs-fixer** (`@PhpCsFixer`/`@Symfony`) handles
 enough files that PHPStan's parallel workers exhaust the default 128M on a cold cache. There is a
 **GitHub Actions CI workflow** (`.github/workflows/ci.yml`) that runs style, PHPStan and the PHPUnit
 suite with coverage on every push/PR; every dependency is a public GitHub repository, so it needs no
-`COMPOSER_AUTH`. Always run `composer fix-style` first (php-cs-fixer auto-fixes what it can), then
-`composer check-style` to surface any remaining violations that must be fixed by hand, then
-`composer stan` and `composer test` before finishing.
+`COMPOSER_AUTH`. After the coverage run, a final **"Enforce 100% coverage"** step runs
+`./bin/php-coverage-check .phpunit.cache/coverage.txt` (from `christianjbrown/code-quality-scripts`)
+against the text report the previous step wrote, and fails the build if anything is below 100%. Run
+the same two commands locally before pushing:
+`XDEBUG_MODE=coverage php -d memory_limit=-1 ./bin/phpunit --coverage-text=.phpunit.cache/coverage.txt`
+then `./bin/php-coverage-check .phpunit.cache/coverage.txt`. Always run `composer fix-style` first
+(php-cs-fixer auto-fixes what it can), then `composer check-style` to surface any remaining
+violations that must be fixed by hand, then `composer stan` and `composer test` before finishing.
 
 ## Architecture
 
@@ -57,12 +62,25 @@ Layers under `src/`, mirrored 1:1 under `tests/`, plus the top-level `Browse` fa
 StudlyCase `EBay`.
 
 - **`Browse`** (`src/Browse.php`) — the facade/entry point. Constructed with a client id, a client
-  secret, a `MarketplaceInterface` and a `TtlAwareKeyValueStoreInterface` for the access token, it
-  builds a Symfony `ContainerBuilder`, registers every transformer and client as a service (ids on
-  `BrowseInterface` as `SERVICE_*` constants), and exposes `getItemApi()`,
-  `getItemCompatibilityApi()` and `getItemSummaryApi()`. `init()` registers in dependency order:
-  `registerCore()`, `registerLeafTransformers()`, `registerComposedTransformers()`,
-  `registerApiClients()` — a service must exist before another references its definition.
+  secret, a `MarketplaceInterface`, a `TtlAwareKeyValueStoreInterface` for the access token and an
+  optional `ApiHostInterface` (defaults to `ApiHost::production()`), it builds a list of
+  `ServiceRegistrarInterface` registrars and hands them to a `ContainerFactory`
+  (`src/Container/ContainerFactory.php`), which runs each in order against one Symfony
+  `ContainerBuilder` and returns it. Service ids live on `BrowseInterface` as `SERVICE_*` constants.
+  `Browse` exposes `getItemApi()`, `getItemCompatibilityApi()` and `getItemSummaryApi()` by asking
+  the built container for those services. The registrars, under `src/Container/`, run in dependency
+  order — a service must exist before another registrar references its definition:
+  `CoreServiceRegistrar` (credentials and the OAuth2 machinery), `LeafTransformerServiceRegistrar`,
+  `ComposedTransformerServiceRegistrar`, then `ApiClientServiceRegistrar`. Adding a new API group
+  means adding one more registrar to the list `Browse` builds, not editing an existing one.
+- **`Http/ApiHost`** (`src/Http/ApiHostInterface.php`, `src/Http/ApiHost.php`) — the value object
+  behind the optional fifth `Browse` constructor argument. `ApiHost::production()` (the default) and
+  `ApiHost::sandbox()` are named constructors; `browseApiUrl(string $path)` and `oauthTokenUrl()` are
+  the two things every `Api` client and `CoreServiceRegistrar` ask it for. The `API_URL_*` constants
+  on `ItemApiInterface`/`ItemSummaryApiInterface`/`ItemCompatibilityApiInterface` and
+  `BrowseInterface::OAUTH_TOKEN_URL` stay for backward compatibility but are no longer read
+  internally — the corresponding `PATH_*` constants on each `Api` interface, resolved through the
+  injected `ApiHostInterface`, are what the clients actually call.
 - **`Marketplace`** (`src/Marketplace.php`) — a small value object holding a `MarketplaceId` enum
   case plus the optional end-user context and `Accept-Language`. `toHeaders()` builds
   `X-EBAY-C-MARKETPLACE-ID`, `X-EBAY-C-ENDUSERCTX` and `Accept-Language`.
@@ -74,10 +92,14 @@ StudlyCase `EBay`.
   models; without it every token exchange fails.
 - **`Api/`** — HTTP clients (`ItemApi`, `ItemCompatibilityApi`, `ItemSummaryApi`). Each is
   constructed with a `JsonApiRequestSenderInterface` (from `christianjbrown/api-client` — no
-  Guzzle/PSR-18 used directly), its transformer(s) and a `CredentialsInterface`. They send the
-  credential headers, defensively validate the response shape, delegate to the transformer and
-  return a typed model. Clients cache by request (`ItemApi` by item id plus query string,
-  `ItemSummaryApi::search` by query string); `searchByImage` is deliberately uncached.
+  Guzzle/PSR-18 used directly), its transformer(s), a `CredentialsInterface` and an
+  `ApiHostInterface`. They send the credential headers, defensively validate the response shape,
+  delegate to the transformer and return a typed model. Clients cache by request through an injected
+  `Cache\KeyedCacheInterface<T>` (`Cache\ArrayKeyedCache` is the in-memory default the container
+  wires): `ItemApi` takes three separate cache instances, one per independent key shape (by item id
+  plus query string, by legacy id query string, by item group id), and `ItemSummaryApi` takes one
+  for `search()` by query string; `searchByImage` is deliberately uncached and `ItemCompatibilityApi`
+  has no cache at all — `check()` has no repeatable cache key worth keying on.
   **POSTs must set `Content-Type: application/json` themselves** — the shared request sender does
   not, and eBay answers `2005 Unsupported or not specified media type` without it.
   **404 handling**: each item client wraps its request in `try`/`catch (BadResponseExceptionInterface)`

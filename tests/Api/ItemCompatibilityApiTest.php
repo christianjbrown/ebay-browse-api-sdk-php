@@ -13,17 +13,20 @@ use ChristianBrown\EBay\Browse\Auth\CredentialsInterface;
 use ChristianBrown\EBay\Browse\Exception\ItemNotFoundException;
 use ChristianBrown\EBay\Browse\Exception\MissingInputException;
 use ChristianBrown\EBay\Browse\Exception\UnexpectedResponseException;
+use ChristianBrown\EBay\Browse\Http\ApiHost;
 use ChristianBrown\EBay\Browse\Model\CompatibilityResponseInterface;
 use ChristianBrown\EBay\Browse\Transformer\CompatibilityResponseTransformerInterface;
 use GuzzleHttp\Exception\BadResponseException as GuzzleBadResponseException;
 use GuzzleHttp\Psr7\Request;
 use GuzzleHttp\Psr7\Response;
 use PHPUnit\Framework\Attributes\CoversClass;
+use PHPUnit\Framework\Attributes\UsesClass;
 use PHPUnit\Framework\TestCase;
 
 use function sprintf;
 
 #[CoversClass(ItemCompatibilityApi::class)]
+#[UsesClass(ApiHost::class)]
 final class ItemCompatibilityApiTest extends TestCase
 {
     private const string ITEM_ID = 'v1|123456789012|0';
@@ -127,7 +130,7 @@ final class ItemCompatibilityApiTest extends TestCase
         $credentials = self::createStub(CredentialsInterface::class);
         $credentials->method('toHeaders')->willReturn(self::headers());
 
-        return new ItemCompatibilityApi($requestSender, $compatibilityResponseTransformer, $credentials);
+        return new ItemCompatibilityApi($requestSender, $compatibilityResponseTransformer, $credentials, ApiHost::production());
     }
 
     /**

@@ -11,6 +11,7 @@ use ChristianBrown\EBay\Browse\Auth\CredentialsInterface;
 use ChristianBrown\EBay\Browse\Exception\ItemNotFoundException;
 use ChristianBrown\EBay\Browse\Exception\MissingInputException;
 use ChristianBrown\EBay\Browse\Exception\UnexpectedResponseException;
+use ChristianBrown\EBay\Browse\Http\ApiHostInterface;
 use ChristianBrown\EBay\Browse\Model\CompatibilityResponseInterface;
 use ChristianBrown\EBay\Browse\Transformer\CompatibilityResponseTransformerInterface;
 use Throwable;
@@ -23,15 +24,17 @@ use function sprintf;
 
 final class ItemCompatibilityApi implements ItemCompatibilityApiInterface
 {
+    private ApiHostInterface $apiHost;
     private CompatibilityResponseTransformerInterface $compatibilityResponseTransformer;
     private CredentialsInterface $credentials;
     private JsonApiRequestSenderInterface $requestSender;
 
-    public function __construct(JsonApiRequestSenderInterface $requestSender, CompatibilityResponseTransformerInterface $compatibilityResponseTransformer, CredentialsInterface $credentials)
+    public function __construct(JsonApiRequestSenderInterface $requestSender, CompatibilityResponseTransformerInterface $compatibilityResponseTransformer, CredentialsInterface $credentials, ApiHostInterface $apiHost)
     {
         $this->requestSender = $requestSender;
         $this->compatibilityResponseTransformer = $compatibilityResponseTransformer;
         $this->credentials = $credentials;
+        $this->apiHost = $apiHost;
     }
 
     /**
@@ -49,7 +52,7 @@ final class ItemCompatibilityApi implements ItemCompatibilityApiInterface
             throw new MissingInputException(self::MISSING_COMPATIBILITY_PROPERTIES);
         }
 
-        $url = sprintf(self::API_URL_SPRINTF, rawurlencode($itemId));
+        $url = sprintf($this->apiHost->browseApiUrl(self::PATH_SPRINTF), rawurlencode($itemId));
         $body = [self::KEY_COMPATIBILITY_PROPERTIES => self::buildProperties($compatibilityProperties)];
 
         try {

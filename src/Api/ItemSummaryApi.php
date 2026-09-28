@@ -7,8 +7,10 @@ namespace ChristianBrown\EBay\Browse\Api;
 use ChristianBrown\ApiClient\Exception\Request\RequestExceptionInterface;
 use ChristianBrown\ApiClient\JsonApiRequestSenderInterface;
 use ChristianBrown\EBay\Browse\Auth\CredentialsInterface;
+use ChristianBrown\EBay\Browse\Cache\KeyedCacheInterface;
 use ChristianBrown\EBay\Browse\Exception\MissingInputException;
 use ChristianBrown\EBay\Browse\Exception\UnexpectedResponseException;
+use ChristianBrown\EBay\Browse\Http\ApiHostInterface;
 use ChristianBrown\EBay\Browse\Model\SearchPagedCollectionInterface;
 use ChristianBrown\EBay\Browse\Transformer\SearchPagedCollectionTransformerInterface;
 
@@ -17,19 +19,30 @@ use function http_build_query;
 
 final class ItemSummaryApi implements ItemSummaryApiInterface
 {
+    private ApiHostInterface $apiHost;
+
     /**
-     * @var array<string, SearchPagedCollectionInterface>
+     * @var KeyedCacheInterface<SearchPagedCollectionInterface>
      */
-    private array $cache = [];
+    private KeyedCacheInterface $cache;
     private CredentialsInterface $credentials;
     private JsonApiRequestSenderInterface $requestSender;
     private SearchPagedCollectionTransformerInterface $searchPagedCollectionTransformer;
 
-    public function __construct(JsonApiRequestSenderInterface $requestSender, SearchPagedCollectionTransformerInterface $searchPagedCollectionTransformer, CredentialsInterface $credentials)
+    /**
+     * @param JsonApiRequestSenderInterface                       $requestSender                    Sends every request this client makes
+     * @param SearchPagedCollectionTransformerInterface           $searchPagedCollectionTransformer Builds a SearchPagedCollectionInterface from raw response data
+     * @param CredentialsInterface                                $credentials                      Supplies the auth and marketplace headers
+     * @param ApiHostInterface                                    $apiHost                          Resolves the Browse API base URL
+     * @param KeyedCacheInterface<SearchPagedCollectionInterface> $cache                            Keyed by search()'s query string
+     */
+    public function __construct(JsonApiRequestSenderInterface $requestSender, SearchPagedCollectionTransformerInterface $searchPagedCollectionTransformer, CredentialsInterface $credentials, ApiHostInterface $apiHost, KeyedCacheInterface $cache)
     {
         $this->requestSender = $requestSender;
         $this->searchPagedCollectionTransformer = $searchPagedCollectionTransformer;
         $this->credentials = $credentials;
+        $this->apiHost = $apiHost;
+        $this->cache = $cache;
     }
 
     /**
@@ -41,18 +54,18 @@ final class ItemSummaryApi implements ItemSummaryApiInterface
         $query = self::buildQuery($q, $gtin, $charityIds, $categoryIds, $epid, $aspectFilter, $compatibilityFilter, $filter, $sort, $fieldgroups, $autoCorrect, $limit, $offset);
         $cacheKey = http_build_query($query);
         if (!$skipCache) {
-            if (isset($this->cache[$cacheKey])) {
-                return $this->cache[$cacheKey];
+            if ($this->cache->has($cacheKey)) {
+                return $this->cache->get($cacheKey);
             }
         }
 
-        $data = $this->requestSender->get(self::API_URL_SEARCH, $query, $this->credentials->toHeaders());
+        $data = $this->requestSender->get($this->apiHost->browseApiUrl(self::PATH_SEARCH), $query, $this->credentials->toHeaders());
 
         if (empty($data)) {
             throw new UnexpectedResponseException(self::UNEXPECTED_RESPONSE);
         }
         $collection = $this->searchPagedCollectionTransformer->transform($data);
-        $this->cache[$cacheKey] = $collection;
+        $this->cache->set($cacheKey, $collection);
 
         return $collection;
     }
@@ -74,7 +87,7 @@ final class ItemSummaryApi implements ItemSummaryApiInterface
         // search minus the keyword-only ones, which are passed as null here.
         $query = self::buildQuery(null, null, $charityIds, $categoryIds, null, $aspectFilter, null, $filter, $sort, $fieldgroups, null, $limit, $offset);
         $body = [self::KEY_IMAGE => $image];
-        $data = $this->requestSender->post(self::API_URL_SEARCH_BY_IMAGE, $query, $this->credentials->toHeaders(), $body);
+        $data = $this->requestSender->post($this->apiHost->browseApiUrl(self::PATH_SEARCH_BY_IMAGE), $query, $this->credentials->toHeaders(), $body);
 
         if (empty($data)) {
             throw new UnexpectedResponseException(self::UNEXPECTED_RESPONSE);

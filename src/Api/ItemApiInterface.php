@@ -18,6 +18,24 @@ interface ItemApiInterface extends ApiInterface
     public const string KEY_LEGACY_ITEM_ID = 'legacy_item_id';
     public const string KEY_LEGACY_VARIATION_ID = 'legacy_variation_id';
     public const string KEY_LEGACY_VARIATION_SKU = 'legacy_variation_sku';
+
+    /**
+     * Relative to ApiHostInterface::browseApiUrl(); resolves to
+     * self::API_URL_ITEM_BY_LEGACY_ID against the production host.
+     */
+    public const string PATH_ITEM_BY_LEGACY_ID = '/item/get_item_by_legacy_id';
+
+    /**
+     * Relative to ApiHostInterface::browseApiUrl(); resolves to
+     * self::API_URL_ITEM_SPRINTF against the production host.
+     */
+    public const string PATH_ITEM_SPRINTF = '/item/%s';
+
+    /**
+     * Relative to ApiHostInterface::browseApiUrl(); resolves to
+     * self::API_URL_ITEMS_BY_ITEM_GROUP against the production host.
+     */
+    public const string PATH_ITEMS_BY_ITEM_GROUP = '/item/get_items_by_item_group';
     public const string UNEXPECTED_RESPONSE = 'Response not set or not an array';
 
     public function getMultipleByItemGroupId(string $itemGroupId, bool $skipCache = false): ItemGroupInterface;
