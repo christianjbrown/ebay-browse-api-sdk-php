@@ -92,10 +92,14 @@ StudlyCase `EBay`.
   models; without it every token exchange fails.
 - **`Api/`** — HTTP clients (`ItemApi`, `ItemCompatibilityApi`, `ItemSummaryApi`). Each is
   constructed with a `JsonApiRequestSenderInterface` (from `christianjbrown/api-client` — no
-  Guzzle/PSR-18 used directly), its transformer(s) and a `CredentialsInterface`. They send the
-  credential headers, defensively validate the response shape, delegate to the transformer and
-  return a typed model. Clients cache by request (`ItemApi` by item id plus query string,
-  `ItemSummaryApi::search` by query string); `searchByImage` is deliberately uncached.
+  Guzzle/PSR-18 used directly), its transformer(s), a `CredentialsInterface` and an
+  `ApiHostInterface`. They send the credential headers, defensively validate the response shape,
+  delegate to the transformer and return a typed model. Clients cache by request through an injected
+  `Cache\KeyedCacheInterface<T>` (`Cache\ArrayKeyedCache` is the in-memory default the container
+  wires): `ItemApi` takes three separate cache instances, one per independent key shape (by item id
+  plus query string, by legacy id query string, by item group id), and `ItemSummaryApi` takes one
+  for `search()` by query string; `searchByImage` is deliberately uncached and `ItemCompatibilityApi`
+  has no cache at all — `check()` has no repeatable cache key worth keying on.
   **POSTs must set `Content-Type: application/json` themselves** — the shared request sender does
   not, and eBay answers `2005 Unsupported or not specified media type` without it.
   **404 handling**: each item client wraps its request in `try`/`catch (BadResponseExceptionInterface)`

@@ -277,7 +277,25 @@ $compatibilityApi = new ItemCompatibilityApi(
 );
 ```
 
-`ItemTransformer` and `ItemSummaryTransformer` take the same treatment with a longer constructor — read the argument list off the class and hand each nested transformer in, in order. `ItemApi` and `ItemSummaryApi` take the same `$requestSender`, their own transformer chain, `$credentials` and `$apiHost` as their last argument, same as `ItemCompatibilityApi` above. The `Browse` facade's registrars under `src/Container/` (`LeafTransformerServiceRegistrar`, `ComposedTransformerServiceRegistrar`, `ApiClientServiceRegistrar`) are the canonical wiring if you need a reference.
+`ItemTransformer` and `ItemSummaryTransformer` take the same treatment with a longer constructor — read the argument list off the class and hand each nested transformer in, in order. `ItemApi` and `ItemSummaryApi` take the same `$requestSender`, their own transformer chain, `$credentials` and `$apiHost`, plus one `KeyedCacheInterface` argument per independent cache they keep — `ItemSummaryApi` takes one (for `search()`), `ItemApi` takes three (for `getOneById()`, `getOneByLegacyId()` and `getMultipleByItemGroupId()`, in that order), each its own `ArrayKeyedCache` instance:
+
+```php
+use ChristianBrown\EBay\Browse\Api\ItemApi;
+use ChristianBrown\EBay\Browse\Cache\ArrayKeyedCache;
+
+$itemApi = new ItemApi(
+    $requestSender,
+    $itemTransformer,
+    $itemGroupTransformer,
+    $credentials,
+    $apiHost,
+    new ArrayKeyedCache(), // getOneById()
+    new ArrayKeyedCache(), // getOneByLegacyId()
+    new ArrayKeyedCache()  // getMultipleByItemGroupId()
+);
+```
+
+The `Browse` facade's registrars under `src/Container/` (`LeafTransformerServiceRegistrar`, `ComposedTransformerServiceRegistrar`, `ApiClientServiceRegistrar`) are the canonical wiring if you need a reference.
 
 </details>
 

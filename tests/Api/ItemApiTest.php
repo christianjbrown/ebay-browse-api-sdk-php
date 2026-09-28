@@ -10,6 +10,7 @@ use ChristianBrown\ApiClient\JsonApiRequestSenderInterface;
 use ChristianBrown\EBay\Browse\Api\ItemApi;
 use ChristianBrown\EBay\Browse\Api\ItemApiInterface;
 use ChristianBrown\EBay\Browse\Auth\CredentialsInterface;
+use ChristianBrown\EBay\Browse\Cache\ArrayKeyedCache;
 use ChristianBrown\EBay\Browse\Exception\ItemNotFoundException;
 use ChristianBrown\EBay\Browse\Exception\UnexpectedResponseException;
 use ChristianBrown\EBay\Browse\Http\ApiHost;
@@ -28,6 +29,7 @@ use function sprintf;
 
 #[CoversClass(ItemApi::class)]
 #[UsesClass(ApiHost::class)]
+#[UsesClass(ArrayKeyedCache::class)]
 final class ItemApiTest extends TestCase
 {
     private const string ITEM_ID = 'v1|123456789012|0';
@@ -373,7 +375,22 @@ final class ItemApiTest extends TestCase
         $credentials = self::createStub(CredentialsInterface::class);
         $credentials->method('toHeaders')->willReturn(self::headers());
 
-        return new ItemApi($requestSender, $itemTransformer, $itemGroupTransformer, $credentials, ApiHost::production());
+        /**
+         * @var ArrayKeyedCache<ItemInterface> $oneCache
+         */
+        $oneCache = new ArrayKeyedCache();
+
+        /**
+         * @var ArrayKeyedCache<ItemInterface> $legacyCache
+         */
+        $legacyCache = new ArrayKeyedCache();
+
+        /**
+         * @var ArrayKeyedCache<ItemGroupInterface> $itemGroupCache
+         */
+        $itemGroupCache = new ArrayKeyedCache();
+
+        return new ItemApi($requestSender, $itemTransformer, $itemGroupTransformer, $credentials, ApiHost::production(), $oneCache, $legacyCache, $itemGroupCache);
     }
 
     /**

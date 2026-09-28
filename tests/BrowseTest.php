@@ -12,6 +12,7 @@ use ChristianBrown\EBay\Browse\Api\ItemSummaryApi;
 use ChristianBrown\EBay\Browse\Api\ItemSummaryApiInterface;
 use ChristianBrown\EBay\Browse\Auth\Credentials;
 use ChristianBrown\EBay\Browse\Browse;
+use ChristianBrown\EBay\Browse\Cache\ArrayKeyedCache;
 use ChristianBrown\EBay\Browse\Container\ApiClientServiceRegistrar;
 use ChristianBrown\EBay\Browse\Container\ComposedTransformerServiceRegistrar;
 use ChristianBrown\EBay\Browse\Container\ContainerFactory;
@@ -78,6 +79,7 @@ use PHPUnit\Framework\TestCase;
 #[CoversClass(Browse::class)]
 #[UsesClass(ApiClientServiceRegistrar::class)]
 #[UsesClass(ApiHost::class)]
+#[UsesClass(ArrayKeyedCache::class)]
 #[UsesClass(AspectDistributionTransformer::class)]
 #[UsesClass(AspectDistributionsTransformer::class)]
 #[UsesClass(AspectValueDistributionTransformer::class)]
