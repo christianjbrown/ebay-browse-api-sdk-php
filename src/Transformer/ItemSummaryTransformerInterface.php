@@ -14,9 +14,12 @@ interface ItemSummaryTransformerInterface
     public const string KEY_BID_COUNT = 'bidCount';
     public const string KEY_BUYING_OPTIONS = 'buyingOptions';
     public const string KEY_CATEGORIES = 'categories';
+    public const string KEY_COMPATIBILITY_MATCH = 'compatibilityMatch';
+    public const string KEY_COMPATIBILITY_PROPERTIES = 'compatibilityProperties';
     public const string KEY_CONDITION = 'condition';
     public const string KEY_CONDITION_ID = 'conditionId';
     public const string KEY_CURRENT_BID_PRICE = 'currentBidPrice';
+    public const string KEY_DISTANCE_FROM_PICKUP_LOCATION = 'distanceFromPickupLocation';
     public const string KEY_ENERGY_EFFICIENCY_CLASS = 'energyEfficiencyClass';
     public const string KEY_EPID = 'epid';
     public const string KEY_IMAGE = 'image';
@@ -34,17 +37,24 @@ interface ItemSummaryTransformerInterface
     public const string KEY_LEGACY_ITEM_ID = 'legacyItemId';
     public const string KEY_LISTING_MARKETPLACE_ID = 'listingMarketplaceId';
     public const string KEY_MARKETING_PRICE = 'marketingPrice';
+    public const string KEY_PICKUP_OPTIONS = 'pickupOptions';
     public const string KEY_PRICE = 'price';
+    public const string KEY_PRICE_DISPLAY_CONDITION = 'priceDisplayCondition';
     public const string KEY_PRIORITY_LISTING = 'priorityListing';
+    public const string KEY_QUALIFIED_PROGRAMS = 'qualifiedPrograms';
     public const string KEY_SELLER = 'seller';
     public const string KEY_SHIPPING_OPTIONS = 'shippingOptions';
     public const string KEY_SHORT_DESCRIPTION = 'shortDescription';
     public const string KEY_THUMBNAIL_IMAGES = 'thumbnailImages';
     public const string KEY_TITLE = 'title';
     public const string KEY_TOP_RATED_BUYING_EXPERIENCE = 'topRatedBuyingExperience';
+    public const string KEY_TYRE_LABEL_IMAGE_URL = 'tyreLabelImageUrl';
     public const string KEY_UNIT_PRICE = 'unitPrice';
     public const string KEY_UNIT_PRICING_MEASURE = 'unitPricingMeasure';
     public const string KEY_WATCH_COUNT = 'watchCount';
+    public const string UNEXPECTED_ARRAY_SPRINTF = '%s not set or not an array';
+    public const string UNEXPECTED_BOOLEAN_SPRINTF = '%s not set or not a boolean';
+    public const string UNEXPECTED_INTEGER_SPRINTF = '%s not set or not an integer';
     public const string UNEXPECTED_STRING_SPRINTF = '%s not set or not a string';
 
     /**

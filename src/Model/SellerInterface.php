@@ -12,6 +12,10 @@ interface SellerInterface
 
     public function getSellerAccountType(): ?string;
 
+    public function getSellerLegalInfo(): ?SellerLegalInfoInterface;
+
+    public function getUserId(): ?string;
+
     public function getUsername(): string;
 
     public function setFeedbackPercentage(?string $value): self;
@@ -19,6 +23,10 @@ interface SellerInterface
     public function setFeedbackScore(?int $value): self;
 
     public function setSellerAccountType(?string $value): self;
+
+    public function setSellerLegalInfo(?SellerLegalInfoInterface $value): self;
+
+    public function setUserId(?string $value): self;
 
     public function setUsername(string $value): self;
 }

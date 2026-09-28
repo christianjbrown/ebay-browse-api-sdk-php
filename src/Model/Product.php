@@ -10,6 +10,16 @@ final class Product implements ProductInterface
      * @var array<int, ImageInterface>
      */
     private array $additionalImages = [];
+
+    /**
+     * @var array<int, AdditionalProductIdentityInterface>
+     */
+    private array $additionalProductIdentities = [];
+
+    /**
+     * @var array<int, AspectGroupInterface>
+     */
+    private array $aspectGroups = [];
     private ?string $brand = null;
     private ?string $description = null;
 
@@ -19,6 +29,11 @@ final class Product implements ProductInterface
     private array $gtins = [];
     private ?ImageInterface $image = null;
     private ?string $mpn = null;
+
+    /**
+     * @var array<int, string>
+     */
+    private array $mpns = [];
     private ?string $title = null;
 
     /**
@@ -27,6 +42,22 @@ final class Product implements ProductInterface
     public function getAdditionalImages(): array
     {
         return $this->additionalImages;
+    }
+
+    /**
+     * @return array<int, AdditionalProductIdentityInterface>
+     */
+    public function getAdditionalProductIdentities(): array
+    {
+        return $this->additionalProductIdentities;
+    }
+
+    /**
+     * @return array<int, AspectGroupInterface>
+     */
+    public function getAspectGroups(): array
+    {
+        return $this->aspectGroups;
     }
 
     public function getBrand(): ?string
@@ -57,6 +88,14 @@ final class Product implements ProductInterface
         return $this->mpn;
     }
 
+    /**
+     * @return array<int, string>
+     */
+    public function getMpns(): array
+    {
+        return $this->mpns;
+    }
+
     public function getTitle(): ?string
     {
         return $this->title;
@@ -68,6 +107,26 @@ final class Product implements ProductInterface
     public function setAdditionalImages(array $value): ProductInterface
     {
         $this->additionalImages = $value;
+
+        return $this;
+    }
+
+    /**
+     * @param array<int, AdditionalProductIdentityInterface> $value
+     */
+    public function setAdditionalProductIdentities(array $value): ProductInterface
+    {
+        $this->additionalProductIdentities = $value;
+
+        return $this;
+    }
+
+    /**
+     * @param array<int, AspectGroupInterface> $value
+     */
+    public function setAspectGroups(array $value): ProductInterface
+    {
+        $this->aspectGroups = $value;
 
         return $this;
     }
@@ -106,6 +165,16 @@ final class Product implements ProductInterface
     public function setMpn(?string $value): ProductInterface
     {
         $this->mpn = $value;
+
+        return $this;
+    }
+
+    /**
+     * @param array<int, string> $value
+     */
+    public function setMpns(array $value): ProductInterface
+    {
+        $this->mpns = $value;
 
         return $this;
     }

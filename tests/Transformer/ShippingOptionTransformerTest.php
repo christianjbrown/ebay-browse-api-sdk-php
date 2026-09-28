@@ -7,9 +7,11 @@ namespace ChristianBrown\EBay\Browse\Tests\Transformer;
 use ChristianBrown\EBay\Browse\Model\ConvertedAmountInterface;
 use ChristianBrown\EBay\Browse\Model\ShippingOption;
 use ChristianBrown\EBay\Browse\Model\ShippingOptionInterface;
+use ChristianBrown\EBay\Browse\Model\ShipToLocationInterface;
 use ChristianBrown\EBay\Browse\Transformer\ConvertedAmountTransformerInterface;
 use ChristianBrown\EBay\Browse\Transformer\ShippingOptionTransformer;
 use ChristianBrown\EBay\Browse\Transformer\ShippingOptionTransformerInterface;
+use ChristianBrown\EBay\Browse\Transformer\ShipToLocationTransformerInterface;
 use Closure;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\DataProvider;
@@ -20,22 +22,26 @@ use PHPUnit\Framework\TestCase;
 final class ShippingOptionTransformerTest extends TestCase
 {
     private ?ConvertedAmountInterface $convertedAmount = null;
+    private ?ShipToLocationInterface $shipToLocation = null;
 
     public function testTransform(): void
     {
         $data = [
             ShippingOptionTransformerInterface::KEY_ADDITIONAL_SHIPPING_COST_PER_UNIT => ['raw_additionalShippingCostPerUnit'],
             ShippingOptionTransformerInterface::KEY_CUT_OFF_DATE_USED_FOR_ESTIMATE => '2024-01-02T03:04:05.000Z',
+            ShippingOptionTransformerInterface::KEY_FULFILLED_THROUGH => 'v_1',
             ShippingOptionTransformerInterface::KEY_GUARANTEED_DELIVERY => true,
             ShippingOptionTransformerInterface::KEY_IMPORT_CHARGES => ['raw_importCharges'],
             ShippingOptionTransformerInterface::KEY_MAX_ESTIMATED_DELIVERY_DATE => '2024-01-02T03:04:05.000Z',
             ShippingOptionTransformerInterface::KEY_MIN_ESTIMATED_DELIVERY_DATE => '2024-01-02T03:04:05.000Z',
-            ShippingOptionTransformerInterface::KEY_QUANTITY_USED_FOR_ESTIMATE => 106,
-            ShippingOptionTransformerInterface::KEY_SHIPPING_CARRIER_CODE => 'v_7',
+            ShippingOptionTransformerInterface::KEY_QUANTITY_USED_FOR_ESTIMATE => 102,
+            ShippingOptionTransformerInterface::KEY_SHIPPING_CARRIER_CODE => 'v_3',
             ShippingOptionTransformerInterface::KEY_SHIPPING_COST => ['raw_shippingCost'],
-            ShippingOptionTransformerInterface::KEY_SHIPPING_COST_TYPE => 'v_9',
-            ShippingOptionTransformerInterface::KEY_SHIPPING_SERVICE_CODE => 'v_10',
-            ShippingOptionTransformerInterface::KEY_TYPE => 'v_11',
+            ShippingOptionTransformerInterface::KEY_SHIPPING_COST_TYPE => 'v_4',
+            ShippingOptionTransformerInterface::KEY_SHIPPING_SERVICE_CODE => 'v_5',
+            ShippingOptionTransformerInterface::KEY_SHIP_TO_LOCATION_USED_FOR_ESTIMATE => ['raw_shipToLocationUsedForEstimate'],
+            ShippingOptionTransformerInterface::KEY_TRADEMARK_SYMBOL => 'v_6',
+            ShippingOptionTransformerInterface::KEY_TYPE => 'v_7',
         ];
 
         $transformer = $this->buildTransformer();
@@ -44,16 +50,19 @@ final class ShippingOptionTransformerTest extends TestCase
 
         self::assertSame($this->convertedAmount, $actual->getAdditionalShippingCostPerUnit());
         self::assertSame(1704164645, $actual->getCutOffDateUsedForEstimate());
+        self::assertSame('v_1', $actual->getFulfilledThrough());
         self::assertTrue($actual->getGuaranteedDelivery());
         self::assertSame($this->convertedAmount, $actual->getImportCharges());
         self::assertSame(1704164645, $actual->getMaxEstimatedDeliveryDate());
         self::assertSame(1704164645, $actual->getMinEstimatedDeliveryDate());
-        self::assertSame(106, $actual->getQuantityUsedForEstimate());
-        self::assertSame('v_7', $actual->getShippingCarrierCode());
+        self::assertSame(102, $actual->getQuantityUsedForEstimate());
+        self::assertSame('v_3', $actual->getShippingCarrierCode());
         self::assertSame($this->convertedAmount, $actual->getShippingCost());
-        self::assertSame('v_9', $actual->getShippingCostType());
-        self::assertSame('v_10', $actual->getShippingServiceCode());
-        self::assertSame('v_11', $actual->getType());
+        self::assertSame('v_4', $actual->getShippingCostType());
+        self::assertSame('v_5', $actual->getShippingServiceCode());
+        self::assertSame($this->shipToLocation, $actual->getShipToLocationUsedForEstimate());
+        self::assertSame('v_6', $actual->getTrademarkSymbol());
+        self::assertSame('v_7', $actual->getType());
     }
 
     /**
@@ -80,6 +89,7 @@ final class ShippingOptionTransformerTest extends TestCase
             static function (ShippingOptionInterface $model): void {
                 self::assertNull($model->getAdditionalShippingCostPerUnit());
                 self::assertNull($model->getCutOffDateUsedForEstimate());
+                self::assertNull($model->getFulfilledThrough());
                 self::assertNull($model->getGuaranteedDelivery());
                 self::assertNull($model->getImportCharges());
                 self::assertNull($model->getMaxEstimatedDeliveryDate());
@@ -89,6 +99,8 @@ final class ShippingOptionTransformerTest extends TestCase
                 self::assertNull($model->getShippingCost());
                 self::assertNull($model->getShippingCostType());
                 self::assertNull($model->getShippingServiceCode());
+                self::assertNull($model->getShipToLocationUsedForEstimate());
+                self::assertNull($model->getTrademarkSymbol());
                 self::assertNull($model->getType());
             },
         ];
@@ -111,6 +123,13 @@ final class ShippingOptionTransformerTest extends TestCase
             [...$base, ShippingOptionTransformerInterface::KEY_CUT_OFF_DATE_USED_FOR_ESTIMATE => 'not-a-date'],
             static function (ShippingOptionInterface $model): void {
                 self::assertNull($model->getCutOffDateUsedForEstimate());
+            },
+        ];
+
+        yield 'fulfilledThroughWrongType' => [
+            [...$base, ShippingOptionTransformerInterface::KEY_FULFILLED_THROUGH => 42],
+            static function (ShippingOptionInterface $model): void {
+                self::assertNull($model->getFulfilledThrough());
             },
         ];
 
@@ -205,6 +224,20 @@ final class ShippingOptionTransformerTest extends TestCase
             },
         ];
 
+        yield 'shipToLocationUsedForEstimateWrongType' => [
+            [...$base, ShippingOptionTransformerInterface::KEY_SHIP_TO_LOCATION_USED_FOR_ESTIMATE => 'x'],
+            static function (ShippingOptionInterface $model): void {
+                self::assertNull($model->getShipToLocationUsedForEstimate());
+            },
+        ];
+
+        yield 'trademarkSymbolWrongType' => [
+            [...$base, ShippingOptionTransformerInterface::KEY_TRADEMARK_SYMBOL => 42],
+            static function (ShippingOptionInterface $model): void {
+                self::assertNull($model->getTrademarkSymbol());
+            },
+        ];
+
         yield 'typeWrongType' => [
             [...$base, ShippingOptionTransformerInterface::KEY_TYPE => 42],
             static function (ShippingOptionInterface $model): void {
@@ -216,10 +249,13 @@ final class ShippingOptionTransformerTest extends TestCase
     private function buildTransformer(): ShippingOptionTransformer
     {
         $this->convertedAmount = self::createStub(ConvertedAmountInterface::class);
+        $this->shipToLocation = self::createStub(ShipToLocationInterface::class);
 
         $convertedAmountTransformer = self::createStub(ConvertedAmountTransformerInterface::class);
         $convertedAmountTransformer->method('transform')->willReturn($this->convertedAmount);
+        $shipToLocationTransformer = self::createStub(ShipToLocationTransformerInterface::class);
+        $shipToLocationTransformer->method('transform')->willReturn($this->shipToLocation);
 
-        return new ShippingOptionTransformer($convertedAmountTransformer);
+        return new ShippingOptionTransformer($convertedAmountTransformer, $shipToLocationTransformer);
     }
 }

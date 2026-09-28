@@ -31,11 +31,11 @@ final class Credentials implements CredentialsInterface
      *
      * @return array<string, string>
      */
-    public function toHeaders(): array
+    public function toHeaders(?string $scope = null): array
     {
         // The token manager returns the cached application token while it is
         // still valid, and otherwise exchanges the Basic credentials for a new one.
-        $accessToken = $this->tokenManager->getAccessTokenFromBasicAuth($this->basicAuthValue, self::SCOPE);
+        $accessToken = $this->tokenManager->getAccessTokenFromBasicAuth($this->basicAuthValue, $scope ?? self::SCOPE);
 
         $headers = [
             self::HEADER_KEY_AUTHORIZATION => sprintf(self::AUTHORIZATION_HEADER_VALUE_SPRINTF, $accessToken->getAccessToken()),

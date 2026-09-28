@@ -39,4 +39,29 @@ final class CredentialsTest extends TestCase
             $credentials->toHeaders()
         );
     }
+
+    public function testToHeadersWithScope(): void
+    {
+        $accessToken = self::createStub(AccessTokenInterface::class);
+        $accessToken->method('getAccessToken')->willReturn('test-access-token');
+
+        $tokenManager = self::createMock(ClientCredentialsTokenManagerInterface::class);
+        $tokenManager->expects(self::once())->method('getAccessTokenFromBasicAuth')
+            ->with('test-client-id:test-client-secret', 'test-scope')
+            ->willReturn($accessToken);
+
+        $marketplace = self::createStub(MarketplaceInterface::class);
+        $marketplace->method('toHeaders')
+            ->willReturn([MarketplaceInterface::HEADER_KEY_MARKETPLACE_ID => 'EBAY_GB']);
+
+        $credentials = new Credentials($tokenManager, $marketplace, 'test-client-id', 'test-client-secret');
+
+        self::assertSame(
+            [
+                CredentialsInterface::HEADER_KEY_AUTHORIZATION => 'Bearer test-access-token',
+                MarketplaceInterface::HEADER_KEY_MARKETPLACE_ID => 'EBAY_GB',
+            ],
+            $credentials->toHeaders('test-scope')
+        );
+    }
 }

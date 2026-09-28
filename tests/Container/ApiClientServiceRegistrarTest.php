@@ -16,6 +16,7 @@ use ChristianBrown\EBay\Browse\Http\ApiHost;
 use ChristianBrown\EBay\Browse\Marketplace;
 use ChristianBrown\EBay\Browse\Model\ItemGroupInterface;
 use ChristianBrown\EBay\Browse\Model\ItemInterface;
+use ChristianBrown\EBay\Browse\Model\ItemsResponseInterface;
 use ChristianBrown\EBay\Browse\Model\SearchPagedCollectionInterface;
 use ChristianBrown\KeyValueStore\MemoryKeyValueStore;
 use PHPUnit\Framework\Attributes\CoversClass;
@@ -71,6 +72,50 @@ final class ApiClientServiceRegistrarTest extends TestCase
         self::assertSame($itemOneCache, $itemApiDefinition->getArgument(5));
         self::assertSame($itemLegacyCache, $itemApiDefinition->getArgument(6));
         self::assertSame($itemGroupCache, $itemApiDefinition->getArgument(7));
+        self::assertSame($container->getDefinition(BrowseInterface::SERVICE_ITEMS_RESPONSE_TRANSFORMER), $itemApiDefinition->getArgument(8));
+        self::assertInstanceOf(ArrayKeyedCache::class, $itemApiDefinition->getArgument(9));
         self::assertSame($itemSummarySearchCache, $itemSummaryApiDefinition->getArgument(4));
+    }
+
+    public function testRegisterWithAnExplicitItemsCache(): void
+    {
+        $apiHost = ApiHost::production();
+
+        /**
+         * @var ArrayKeyedCache<ItemInterface> $itemOneCache
+         */
+        $itemOneCache = new ArrayKeyedCache();
+
+        /**
+         * @var ArrayKeyedCache<ItemInterface> $itemLegacyCache
+         */
+        $itemLegacyCache = new ArrayKeyedCache();
+
+        /**
+         * @var ArrayKeyedCache<ItemGroupInterface> $itemGroupCache
+         */
+        $itemGroupCache = new ArrayKeyedCache();
+
+        /**
+         * @var ArrayKeyedCache<SearchPagedCollectionInterface> $itemSummarySearchCache
+         */
+        $itemSummarySearchCache = new ArrayKeyedCache();
+
+        /**
+         * @var ArrayKeyedCache<ItemsResponseInterface> $itemsCache
+         */
+        $itemsCache = new ArrayKeyedCache();
+
+        $container = new ContainerBuilder();
+        (new CoreServiceRegistrar('client-id', 'client-secret', new Marketplace(MarketplaceId::EBAY_GB), new MemoryKeyValueStore(), $apiHost))->register($container);
+        (new LeafTransformerServiceRegistrar())->register($container);
+        (new ComposedTransformerServiceRegistrar())->register($container);
+        $registrar = new ApiClientServiceRegistrar($apiHost, $itemOneCache, $itemLegacyCache, $itemGroupCache, $itemSummarySearchCache, $itemsCache);
+
+        $registrar->register($container);
+
+        $itemApiDefinition = $container->getDefinition(BrowseInterface::SERVICE_ITEM_API);
+
+        self::assertSame($itemsCache, $itemApiDefinition->getArgument(9));
     }
 }

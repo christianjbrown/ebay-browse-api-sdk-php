@@ -19,10 +19,16 @@ interface CredentialsInterface
      * (client-credentials) OAuth2 bearer token as `Authorization`, plus the
      * marketplace headers.
      *
+     * @param null|string $scope The OAuth2 scope(s) to request, space-separated.
+     *                           Defaults to self::SCOPE; a call that needs a
+     *                           broader grant (e.g. getItems()'s Limited
+     *                           Release bulk scope) passes its own value so
+     *                           existing callers are unaffected.
+     *
      * @throws BadResponsePayloadFieldExceptionInterface
      * @throws RequestExceptionInterface
      *
      * @return array<string, string>
      */
-    public function toHeaders(): array;
+    public function toHeaders(?string $scope = null): array;
 }

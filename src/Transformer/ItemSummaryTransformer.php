@@ -18,26 +18,32 @@ use function strtotime;
 final class ItemSummaryTransformer implements ItemSummaryTransformerInterface
 {
     private CategoriesTransformerInterface $categoriesTransformer;
+    private CompatibilityPropertiesTransformerInterface $compatibilityPropertiesTransformer;
     private ConvertedAmountTransformerInterface $convertedAmountTransformer;
     private ImagesTransformerInterface $imagesTransformer;
     private ImageTransformerInterface $imageTransformer;
     private ItemLocationTransformerInterface $itemLocationTransformer;
     private MarketingPriceTransformerInterface $marketingPriceTransformer;
+    private PickupOptionSummariesTransformerInterface $pickupOptionSummariesTransformer;
     private SellerTransformerInterface $sellerTransformer;
     private ShippingOptionsTransformerInterface $shippingOptionsTransformer;
     private StringsTransformerInterface $stringsTransformer;
+    private TargetLocationTransformerInterface $targetLocationTransformer;
 
-    public function __construct(CategoriesTransformerInterface $categoriesTransformer, ConvertedAmountTransformerInterface $convertedAmountTransformer, ImageTransformerInterface $imageTransformer, ImagesTransformerInterface $imagesTransformer, ItemLocationTransformerInterface $itemLocationTransformer, MarketingPriceTransformerInterface $marketingPriceTransformer, SellerTransformerInterface $sellerTransformer, ShippingOptionsTransformerInterface $shippingOptionsTransformer, StringsTransformerInterface $stringsTransformer)
+    public function __construct(CategoriesTransformerInterface $categoriesTransformer, CompatibilityPropertiesTransformerInterface $compatibilityPropertiesTransformer, ConvertedAmountTransformerInterface $convertedAmountTransformer, ImageTransformerInterface $imageTransformer, ImagesTransformerInterface $imagesTransformer, ItemLocationTransformerInterface $itemLocationTransformer, MarketingPriceTransformerInterface $marketingPriceTransformer, PickupOptionSummariesTransformerInterface $pickupOptionSummariesTransformer, SellerTransformerInterface $sellerTransformer, ShippingOptionsTransformerInterface $shippingOptionsTransformer, StringsTransformerInterface $stringsTransformer, TargetLocationTransformerInterface $targetLocationTransformer)
     {
         $this->categoriesTransformer = $categoriesTransformer;
+        $this->compatibilityPropertiesTransformer = $compatibilityPropertiesTransformer;
         $this->convertedAmountTransformer = $convertedAmountTransformer;
         $this->imageTransformer = $imageTransformer;
         $this->imagesTransformer = $imagesTransformer;
         $this->itemLocationTransformer = $itemLocationTransformer;
         $this->marketingPriceTransformer = $marketingPriceTransformer;
+        $this->pickupOptionSummariesTransformer = $pickupOptionSummariesTransformer;
         $this->sellerTransformer = $sellerTransformer;
         $this->shippingOptionsTransformer = $shippingOptionsTransformer;
         $this->stringsTransformer = $stringsTransformer;
+        $this->targetLocationTransformer = $targetLocationTransformer;
     }
 
     /**
@@ -59,9 +65,12 @@ final class ItemSummaryTransformer implements ItemSummaryTransformerInterface
         self::applyBidCount($itemSummary, $data);
         $this->applyBuyingOptions($itemSummary, $data);
         $this->applyCategories($itemSummary, $data);
+        self::applyCompatibilityMatch($itemSummary, $data);
+        $this->applyCompatibilityProperties($itemSummary, $data);
         self::applyCondition($itemSummary, $data);
         self::applyConditionId($itemSummary, $data);
         $this->applyCurrentBidPrice($itemSummary, $data);
+        $this->applyDistanceFromPickupLocation($itemSummary, $data);
         self::applyEnergyEfficiencyClass($itemSummary, $data);
         self::applyEpid($itemSummary, $data);
         $this->applyImage($itemSummary, $data);
@@ -78,14 +87,18 @@ final class ItemSummaryTransformer implements ItemSummaryTransformerInterface
         self::applyLegacyItemId($itemSummary, $data);
         self::applyListingMarketplaceId($itemSummary, $data);
         $this->applyMarketingPrice($itemSummary, $data);
+        $this->applyPickupOptions($itemSummary, $data);
         $this->applyPrice($itemSummary, $data);
+        self::applyPriceDisplayCondition($itemSummary, $data);
         self::applyPriorityListing($itemSummary, $data);
+        $this->applyQualifiedPrograms($itemSummary, $data);
         $this->applySeller($itemSummary, $data);
         $this->applyShippingOptions($itemSummary, $data);
         self::applyShortDescription($itemSummary, $data);
         $this->applyThumbnailImages($itemSummary, $data);
         self::applyTitle($itemSummary, $data);
         self::applyTopRatedBuyingExperience($itemSummary, $data);
+        self::applyTyreLabelImageUrl($itemSummary, $data);
         $this->applyUnitPrice($itemSummary, $data);
         self::applyUnitPricingMeasure($itemSummary, $data);
         self::applyWatchCount($itemSummary, $data);
@@ -180,6 +193,34 @@ final class ItemSummaryTransformer implements ItemSummaryTransformerInterface
     /**
      * @phpstan-param mixed[] $data
      */
+    private static function applyCompatibilityMatch(ItemSummary $itemSummary, array $data): void
+    {
+        if (empty($data[self::KEY_COMPATIBILITY_MATCH])) {
+            return;
+        }
+        if (!is_string($data[self::KEY_COMPATIBILITY_MATCH])) {
+            return;
+        }
+        $itemSummary->setCompatibilityMatch($data[self::KEY_COMPATIBILITY_MATCH]);
+    }
+
+    /**
+     * @phpstan-param mixed[] $data
+     */
+    private function applyCompatibilityProperties(ItemSummary $itemSummary, array $data): void
+    {
+        if (empty($data[self::KEY_COMPATIBILITY_PROPERTIES])) {
+            return;
+        }
+        if (!is_array($data[self::KEY_COMPATIBILITY_PROPERTIES])) {
+            return;
+        }
+        $itemSummary->setCompatibilityProperties($this->compatibilityPropertiesTransformer->transform($data[self::KEY_COMPATIBILITY_PROPERTIES]));
+    }
+
+    /**
+     * @phpstan-param mixed[] $data
+     */
     private static function applyCondition(ItemSummary $itemSummary, array $data): void
     {
         if (empty($data[self::KEY_CONDITION])) {
@@ -217,6 +258,20 @@ final class ItemSummaryTransformer implements ItemSummaryTransformerInterface
             return;
         }
         $itemSummary->setCurrentBidPrice($this->convertedAmountTransformer->transform($data[self::KEY_CURRENT_BID_PRICE]));
+    }
+
+    /**
+     * @phpstan-param mixed[] $data
+     */
+    private function applyDistanceFromPickupLocation(ItemSummary $itemSummary, array $data): void
+    {
+        if (empty($data[self::KEY_DISTANCE_FROM_PICKUP_LOCATION])) {
+            return;
+        }
+        if (!is_array($data[self::KEY_DISTANCE_FROM_PICKUP_LOCATION])) {
+            return;
+        }
+        $itemSummary->setDistanceFromPickupLocation($this->targetLocationTransformer->transform($data[self::KEY_DISTANCE_FROM_PICKUP_LOCATION]));
     }
 
     /**
@@ -458,6 +513,20 @@ final class ItemSummaryTransformer implements ItemSummaryTransformerInterface
     /**
      * @phpstan-param mixed[] $data
      */
+    private function applyPickupOptions(ItemSummary $itemSummary, array $data): void
+    {
+        if (empty($data[self::KEY_PICKUP_OPTIONS])) {
+            return;
+        }
+        if (!is_array($data[self::KEY_PICKUP_OPTIONS])) {
+            return;
+        }
+        $itemSummary->setPickupOptions($this->pickupOptionSummariesTransformer->transform($data[self::KEY_PICKUP_OPTIONS]));
+    }
+
+    /**
+     * @phpstan-param mixed[] $data
+     */
     private function applyPrice(ItemSummary $itemSummary, array $data): void
     {
         if (empty($data[self::KEY_PRICE])) {
@@ -472,6 +541,20 @@ final class ItemSummaryTransformer implements ItemSummaryTransformerInterface
     /**
      * @phpstan-param mixed[] $data
      */
+    private static function applyPriceDisplayCondition(ItemSummary $itemSummary, array $data): void
+    {
+        if (empty($data[self::KEY_PRICE_DISPLAY_CONDITION])) {
+            return;
+        }
+        if (!is_string($data[self::KEY_PRICE_DISPLAY_CONDITION])) {
+            return;
+        }
+        $itemSummary->setPriceDisplayCondition($data[self::KEY_PRICE_DISPLAY_CONDITION]);
+    }
+
+    /**
+     * @phpstan-param mixed[] $data
+     */
     private static function applyPriorityListing(ItemSummary $itemSummary, array $data): void
     {
         if (!isset($data[self::KEY_PRIORITY_LISTING])) {
@@ -481,6 +564,20 @@ final class ItemSummaryTransformer implements ItemSummaryTransformerInterface
             return;
         }
         $itemSummary->setPriorityListing($data[self::KEY_PRIORITY_LISTING]);
+    }
+
+    /**
+     * @phpstan-param mixed[] $data
+     */
+    private function applyQualifiedPrograms(ItemSummary $itemSummary, array $data): void
+    {
+        if (empty($data[self::KEY_QUALIFIED_PROGRAMS])) {
+            return;
+        }
+        if (!is_array($data[self::KEY_QUALIFIED_PROGRAMS])) {
+            return;
+        }
+        $itemSummary->setQualifiedPrograms($this->stringsTransformer->transform($data[self::KEY_QUALIFIED_PROGRAMS]));
     }
 
     /**
@@ -565,6 +662,20 @@ final class ItemSummaryTransformer implements ItemSummaryTransformerInterface
             return;
         }
         $itemSummary->setTopRatedBuyingExperience($data[self::KEY_TOP_RATED_BUYING_EXPERIENCE]);
+    }
+
+    /**
+     * @phpstan-param mixed[] $data
+     */
+    private static function applyTyreLabelImageUrl(ItemSummary $itemSummary, array $data): void
+    {
+        if (empty($data[self::KEY_TYRE_LABEL_IMAGE_URL])) {
+            return;
+        }
+        if (!is_string($data[self::KEY_TYRE_LABEL_IMAGE_URL])) {
+            return;
+        }
+        $itemSummary->setTyreLabelImageUrl($data[self::KEY_TYRE_LABEL_IMAGE_URL]);
     }
 
     /**

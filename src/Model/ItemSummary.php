@@ -23,9 +23,16 @@ final class ItemSummary implements ItemSummaryInterface
      * @var array<int, CategoryInterface>
      */
     private array $categories = [];
+    private ?string $compatibilityMatch = null;
+
+    /**
+     * @var array<int, CompatibilityPropertyInterface>
+     */
+    private array $compatibilityProperties = [];
     private ?string $condition = null;
     private ?string $conditionId = null;
     private ?ConvertedAmountInterface $currentBidPrice = null;
+    private ?TargetLocationInterface $distanceFromPickupLocation = null;
     private ?string $energyEfficiencyClass = null;
     private ?string $epid = null;
     private ?ImageInterface $image = null;
@@ -47,8 +54,19 @@ final class ItemSummary implements ItemSummaryInterface
     private ?string $legacyItemId = null;
     private ?string $listingMarketplaceId = null;
     private ?MarketingPriceInterface $marketingPrice = null;
+
+    /**
+     * @var array<int, PickupOptionSummaryInterface>
+     */
+    private array $pickupOptions = [];
     private ?ConvertedAmountInterface $price = null;
+    private ?string $priceDisplayCondition = null;
     private ?bool $priorityListing = null;
+
+    /**
+     * @var array<int, string>
+     */
+    private array $qualifiedPrograms = [];
     private ?SellerInterface $seller = null;
 
     /**
@@ -63,6 +81,7 @@ final class ItemSummary implements ItemSummaryInterface
     private array $thumbnailImages = [];
     private ?string $title = null;
     private ?bool $topRatedBuyingExperience = null;
+    private ?string $tyreLabelImageUrl = null;
     private ?ConvertedAmountInterface $unitPrice = null;
     private ?string $unitPricingMeasure = null;
     private ?int $watchCount = null;
@@ -111,6 +130,19 @@ final class ItemSummary implements ItemSummaryInterface
         return $this->categories;
     }
 
+    public function getCompatibilityMatch(): ?string
+    {
+        return $this->compatibilityMatch;
+    }
+
+    /**
+     * @return array<int, CompatibilityPropertyInterface>
+     */
+    public function getCompatibilityProperties(): array
+    {
+        return $this->compatibilityProperties;
+    }
+
     public function getCondition(): ?string
     {
         return $this->condition;
@@ -124,6 +156,11 @@ final class ItemSummary implements ItemSummaryInterface
     public function getCurrentBidPrice(): ?ConvertedAmountInterface
     {
         return $this->currentBidPrice;
+    }
+
+    public function getDistanceFromPickupLocation(): ?TargetLocationInterface
+    {
+        return $this->distanceFromPickupLocation;
     }
 
     public function getEnergyEfficiencyClass(): ?string
@@ -214,14 +251,35 @@ final class ItemSummary implements ItemSummaryInterface
         return $this->marketingPrice;
     }
 
+    /**
+     * @return array<int, PickupOptionSummaryInterface>
+     */
+    public function getPickupOptions(): array
+    {
+        return $this->pickupOptions;
+    }
+
     public function getPrice(): ?ConvertedAmountInterface
     {
         return $this->price;
     }
 
+    public function getPriceDisplayCondition(): ?string
+    {
+        return $this->priceDisplayCondition;
+    }
+
     public function getPriorityListing(): ?bool
     {
         return $this->priorityListing;
+    }
+
+    /**
+     * @return array<int, string>
+     */
+    public function getQualifiedPrograms(): array
+    {
+        return $this->qualifiedPrograms;
     }
 
     public function getSeller(): ?SellerInterface
@@ -258,6 +316,11 @@ final class ItemSummary implements ItemSummaryInterface
     public function getTopRatedBuyingExperience(): ?bool
     {
         return $this->topRatedBuyingExperience;
+    }
+
+    public function getTyreLabelImageUrl(): ?string
+    {
+        return $this->tyreLabelImageUrl;
     }
 
     public function getUnitPrice(): ?ConvertedAmountInterface
@@ -326,6 +389,23 @@ final class ItemSummary implements ItemSummaryInterface
         return $this;
     }
 
+    public function setCompatibilityMatch(?string $value): ItemSummaryInterface
+    {
+        $this->compatibilityMatch = $value;
+
+        return $this;
+    }
+
+    /**
+     * @param array<int, CompatibilityPropertyInterface> $value
+     */
+    public function setCompatibilityProperties(array $value): ItemSummaryInterface
+    {
+        $this->compatibilityProperties = $value;
+
+        return $this;
+    }
+
     public function setCondition(?string $value): ItemSummaryInterface
     {
         $this->condition = $value;
@@ -343,6 +423,13 @@ final class ItemSummary implements ItemSummaryInterface
     public function setCurrentBidPrice(?ConvertedAmountInterface $value): ItemSummaryInterface
     {
         $this->currentBidPrice = $value;
+
+        return $this;
+    }
+
+    public function setDistanceFromPickupLocation(?TargetLocationInterface $value): ItemSummaryInterface
+    {
+        $this->distanceFromPickupLocation = $value;
 
         return $this;
     }
@@ -469,6 +556,16 @@ final class ItemSummary implements ItemSummaryInterface
         return $this;
     }
 
+    /**
+     * @param array<int, PickupOptionSummaryInterface> $value
+     */
+    public function setPickupOptions(array $value): ItemSummaryInterface
+    {
+        $this->pickupOptions = $value;
+
+        return $this;
+    }
+
     public function setPrice(?ConvertedAmountInterface $value): ItemSummaryInterface
     {
         $this->price = $value;
@@ -476,9 +573,26 @@ final class ItemSummary implements ItemSummaryInterface
         return $this;
     }
 
+    public function setPriceDisplayCondition(?string $value): ItemSummaryInterface
+    {
+        $this->priceDisplayCondition = $value;
+
+        return $this;
+    }
+
     public function setPriorityListing(?bool $value): ItemSummaryInterface
     {
         $this->priorityListing = $value;
+
+        return $this;
+    }
+
+    /**
+     * @param array<int, string> $value
+     */
+    public function setQualifiedPrograms(array $value): ItemSummaryInterface
+    {
+        $this->qualifiedPrograms = $value;
 
         return $this;
     }
@@ -527,6 +641,13 @@ final class ItemSummary implements ItemSummaryInterface
     public function setTopRatedBuyingExperience(?bool $value): ItemSummaryInterface
     {
         $this->topRatedBuyingExperience = $value;
+
+        return $this;
+    }
+
+    public function setTyreLabelImageUrl(?string $value): ItemSummaryInterface
+    {
+        $this->tyreLabelImageUrl = $value;
 
         return $this;
     }

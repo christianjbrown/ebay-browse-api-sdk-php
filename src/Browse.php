@@ -17,6 +17,7 @@ use ChristianBrown\EBay\Browse\Http\ApiHost;
 use ChristianBrown\EBay\Browse\Http\ApiHostInterface;
 use ChristianBrown\EBay\Browse\Model\ItemGroupInterface;
 use ChristianBrown\EBay\Browse\Model\ItemInterface;
+use ChristianBrown\EBay\Browse\Model\ItemsResponseInterface;
 use ChristianBrown\EBay\Browse\Model\SearchPagedCollectionInterface;
 use ChristianBrown\KeyValueStore\TtlAwareKeyValueStoreInterface;
 use Psr\Container\ContainerExceptionInterface;
@@ -54,6 +55,11 @@ final class Browse implements BrowseInterface
          */
         $itemSummarySearchCache = new ArrayKeyedCache();
 
+        /**
+         * @var ArrayKeyedCache<ItemsResponseInterface> $itemsCache
+         */
+        $itemsCache = new ArrayKeyedCache();
+
         // The registrars run in dependency order: core (credentials and the
         // OAuth2 machinery) must exist before any transformer or client
         // references it, leaf transformers before the composed transformers
@@ -64,7 +70,7 @@ final class Browse implements BrowseInterface
                 new CoreServiceRegistrar($clientId, $clientSecret, $marketplace, $accessTokenStore, $resolvedApiHost),
                 new LeafTransformerServiceRegistrar(),
                 new ComposedTransformerServiceRegistrar(),
-                new ApiClientServiceRegistrar($resolvedApiHost, $itemOneCache, $itemLegacyCache, $itemGroupCache, $itemSummarySearchCache),
+                new ApiClientServiceRegistrar($resolvedApiHost, $itemOneCache, $itemLegacyCache, $itemGroupCache, $itemSummarySearchCache, $itemsCache),
             ],
         );
         $this->container = $containerFactory->create();

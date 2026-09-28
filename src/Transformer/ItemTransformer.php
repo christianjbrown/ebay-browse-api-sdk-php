@@ -17,38 +17,66 @@ use function strtotime;
 
 final class ItemTransformer implements ItemTransformerInterface
 {
+    private AddonServicesTransformerInterface $addonServicesTransformer;
+    private AuthenticityGuaranteeProgramTransformerInterface $authenticityGuaranteeProgramTransformer;
+    private AuthenticityVerificationProgramTransformerInterface $authenticityVerificationProgramTransformer;
+    private AvailableCouponsTransformerInterface $availableCouponsTransformer;
+    private CompanyAddressTransformerInterface $companyAddressTransformer;
+    private ConditionDescriptorsTransformerInterface $conditionDescriptorsTransformer;
     private ConvertedAmountTransformerInterface $convertedAmountTransformer;
     private ErrorsTransformerInterface $errorsTransformer;
     private EstimatedAvailabilitiesTransformerInterface $estimatedAvailabilitiesTransformer;
+    private HazardousMaterialsLabelsTransformerInterface $hazardousMaterialsLabelsTransformer;
     private ImagesTransformerInterface $imagesTransformer;
     private ImageTransformerInterface $imageTransformer;
+    private ItemCharityTermsTransformerInterface $itemCharityTermsTransformer;
+    private ItemGroupSummaryTransformerInterface $itemGroupSummaryTransformer;
     private ItemLocationTransformerInterface $itemLocationTransformer;
     private MarketingPriceTransformerInterface $marketingPriceTransformer;
     private PaymentMethodsTransformerInterface $paymentMethodsTransformer;
+    private ProductSafetyLabelsTransformerInterface $productSafetyLabelsTransformer;
     private ProductTransformerInterface $productTransformer;
+    private ResponsiblePersonsTransformerInterface $responsiblePersonsTransformer;
     private ReturnTermsTransformerInterface $returnTermsTransformer;
+    private ReviewRatingTransformerInterface $reviewRatingTransformer;
+    private SellerCustomPoliciesTransformerInterface $sellerCustomPoliciesTransformer;
     private SellerTransformerInterface $sellerTransformer;
     private ShippingOptionsTransformerInterface $shippingOptionsTransformer;
     private ShipToLocationsTransformerInterface $shipToLocationsTransformer;
     private StringsTransformerInterface $stringsTransformer;
+    private TaxesTransformerInterface $taxesTransformer;
     private TypedNameValuesTransformerInterface $typedNameValuesTransformer;
 
-    public function __construct(ConvertedAmountTransformerInterface $convertedAmountTransformer, ErrorsTransformerInterface $errorsTransformer, EstimatedAvailabilitiesTransformerInterface $estimatedAvailabilitiesTransformer, ImageTransformerInterface $imageTransformer, ImagesTransformerInterface $imagesTransformer, ItemLocationTransformerInterface $itemLocationTransformer, MarketingPriceTransformerInterface $marketingPriceTransformer, PaymentMethodsTransformerInterface $paymentMethodsTransformer, ProductTransformerInterface $productTransformer, ReturnTermsTransformerInterface $returnTermsTransformer, SellerTransformerInterface $sellerTransformer, ShipToLocationsTransformerInterface $shipToLocationsTransformer, ShippingOptionsTransformerInterface $shippingOptionsTransformer, StringsTransformerInterface $stringsTransformer, TypedNameValuesTransformerInterface $typedNameValuesTransformer)
+    public function __construct(AddonServicesTransformerInterface $addonServicesTransformer, AuthenticityGuaranteeProgramTransformerInterface $authenticityGuaranteeProgramTransformer, AuthenticityVerificationProgramTransformerInterface $authenticityVerificationProgramTransformer, AvailableCouponsTransformerInterface $availableCouponsTransformer, CompanyAddressTransformerInterface $companyAddressTransformer, ConditionDescriptorsTransformerInterface $conditionDescriptorsTransformer, ConvertedAmountTransformerInterface $convertedAmountTransformer, ErrorsTransformerInterface $errorsTransformer, EstimatedAvailabilitiesTransformerInterface $estimatedAvailabilitiesTransformer, HazardousMaterialsLabelsTransformerInterface $hazardousMaterialsLabelsTransformer, ImageTransformerInterface $imageTransformer, ImagesTransformerInterface $imagesTransformer, ItemCharityTermsTransformerInterface $itemCharityTermsTransformer, ItemGroupSummaryTransformerInterface $itemGroupSummaryTransformer, ItemLocationTransformerInterface $itemLocationTransformer, MarketingPriceTransformerInterface $marketingPriceTransformer, PaymentMethodsTransformerInterface $paymentMethodsTransformer, ProductSafetyLabelsTransformerInterface $productSafetyLabelsTransformer, ProductTransformerInterface $productTransformer, ResponsiblePersonsTransformerInterface $responsiblePersonsTransformer, ReturnTermsTransformerInterface $returnTermsTransformer, ReviewRatingTransformerInterface $reviewRatingTransformer, SellerCustomPoliciesTransformerInterface $sellerCustomPoliciesTransformer, SellerTransformerInterface $sellerTransformer, ShipToLocationsTransformerInterface $shipToLocationsTransformer, ShippingOptionsTransformerInterface $shippingOptionsTransformer, StringsTransformerInterface $stringsTransformer, TaxesTransformerInterface $taxesTransformer, TypedNameValuesTransformerInterface $typedNameValuesTransformer)
     {
+        $this->addonServicesTransformer = $addonServicesTransformer;
+        $this->authenticityGuaranteeProgramTransformer = $authenticityGuaranteeProgramTransformer;
+        $this->authenticityVerificationProgramTransformer = $authenticityVerificationProgramTransformer;
+        $this->availableCouponsTransformer = $availableCouponsTransformer;
+        $this->companyAddressTransformer = $companyAddressTransformer;
+        $this->conditionDescriptorsTransformer = $conditionDescriptorsTransformer;
         $this->convertedAmountTransformer = $convertedAmountTransformer;
         $this->errorsTransformer = $errorsTransformer;
         $this->estimatedAvailabilitiesTransformer = $estimatedAvailabilitiesTransformer;
+        $this->hazardousMaterialsLabelsTransformer = $hazardousMaterialsLabelsTransformer;
         $this->imageTransformer = $imageTransformer;
         $this->imagesTransformer = $imagesTransformer;
+        $this->itemCharityTermsTransformer = $itemCharityTermsTransformer;
+        $this->itemGroupSummaryTransformer = $itemGroupSummaryTransformer;
         $this->itemLocationTransformer = $itemLocationTransformer;
         $this->marketingPriceTransformer = $marketingPriceTransformer;
         $this->paymentMethodsTransformer = $paymentMethodsTransformer;
+        $this->productSafetyLabelsTransformer = $productSafetyLabelsTransformer;
         $this->productTransformer = $productTransformer;
+        $this->responsiblePersonsTransformer = $responsiblePersonsTransformer;
         $this->returnTermsTransformer = $returnTermsTransformer;
+        $this->reviewRatingTransformer = $reviewRatingTransformer;
+        $this->sellerCustomPoliciesTransformer = $sellerCustomPoliciesTransformer;
         $this->sellerTransformer = $sellerTransformer;
         $this->shipToLocationsTransformer = $shipToLocationsTransformer;
         $this->shippingOptionsTransformer = $shippingOptionsTransformer;
         $this->stringsTransformer = $stringsTransformer;
+        $this->taxesTransformer = $taxesTransformer;
         $this->typedNameValuesTransformer = $typedNameValuesTransformer;
     }
 
@@ -66,28 +94,38 @@ final class ItemTransformer implements ItemTransformerInterface
         $item = new Item($data[self::KEY_ITEM_ID]);
 
         $this->applyAdditionalImages($item, $data);
+        $this->applyAddonServices($item, $data);
         self::applyAdultOnly($item, $data);
         self::applyAgeGroup($item, $data);
+        $this->applyAuthenticityGuarantee($item, $data);
+        $this->applyAuthenticityVerification($item, $data);
+        $this->applyAvailableCoupons($item, $data);
         self::applyBidCount($item, $data);
         self::applyBrand($item, $data);
         $this->applyBuyingOptions($item, $data);
         self::applyCategoryId($item, $data);
         self::applyCategoryIdPath($item, $data);
         self::applyCategoryPath($item, $data);
+        $this->applyCharityTerms($item, $data);
         self::applyColor($item, $data);
         self::applyCondition($item, $data);
         self::applyConditionDescription($item, $data);
+        $this->applyConditionDescriptors($item, $data);
         self::applyConditionId($item, $data);
         $this->applyCurrentBidPrice($item, $data);
         self::applyDescription($item, $data);
+        $this->applyEcoParticipationFee($item, $data);
         self::applyEligibleForInlineCheckout($item, $data);
         self::applyEnabledForGuestCheckout($item, $data);
         self::applyEnergyEfficiencyClass($item, $data);
         self::applyEpid($item, $data);
         $this->applyEstimatedAvailabilities($item, $data);
+        self::applyGender($item, $data);
         self::applyGtin($item, $data);
+        $this->applyHazardousMaterialsLabels($item, $data);
         $this->applyImage($item, $data);
         self::applyImmediatePay($item, $data);
+        self::applyInferredEpid($item, $data);
         self::applyItemAffiliateWebUrl($item, $data);
         self::applyItemCreationDate($item, $data);
         self::applyItemEndDate($item, $data);
@@ -97,26 +135,46 @@ final class ItemTransformer implements ItemTransformerInterface
         self::applyListingMarketplaceId($item, $data);
         $this->applyLocalizedAspects($item, $data);
         self::applyLotSize($item, $data);
+        $this->applyManufacturer($item, $data);
         $this->applyMarketingPrice($item, $data);
         self::applyMaterial($item, $data);
+        $this->applyMinimumPriceToBid($item, $data);
         self::applyMpn($item, $data);
+        self::applyPattern($item, $data);
         $this->applyPaymentMethods($item, $data);
         $this->applyPrice($item, $data);
+        self::applyPriceDisplayCondition($item, $data);
+        $this->applyPrimaryItemGroup($item, $data);
+        $this->applyPrimaryProductReviewRating($item, $data);
         self::applyPriorityListing($item, $data);
         $this->applyProduct($item, $data);
+        self::applyProductFicheWebUrl($item, $data);
+        $this->applyProductSafetyLabels($item, $data);
+        $this->applyQualifiedPrograms($item, $data);
+        self::applyQuantityLimitPerBuyer($item, $data);
+        self::applyRepairScore($item, $data);
+        self::applyReservePriceMet($item, $data);
+        $this->applyResponsiblePersons($item, $data);
         $this->applyReturnTerms($item, $data);
         $this->applySeller($item, $data);
+        $this->applySellerCustomPolicies($item, $data);
         self::applySellerItemRevision($item, $data);
-        $this->applyShipToLocations($item, $data);
         $this->applyShippingOptions($item, $data);
+        $this->applyShipToLocations($item, $data);
         self::applyShortDescription($item, $data);
+        self::applySize($item, $data);
+        self::applySizeSystem($item, $data);
+        self::applySizeType($item, $data);
         self::applySubtitle($item, $data);
+        $this->applyTaxes($item, $data);
         self::applyTitle($item, $data);
         self::applyTopRatedBuyingExperience($item, $data);
+        self::applyTyreLabelImageUrl($item, $data);
         self::applyUniqueBidderCount($item, $data);
         $this->applyUnitPrice($item, $data);
         self::applyUnitPricingMeasure($item, $data);
         $this->applyWarnings($item, $data);
+        self::applyWatchCount($item, $data);
 
         return $item;
     }
@@ -133,6 +191,20 @@ final class ItemTransformer implements ItemTransformerInterface
             return;
         }
         $item->setAdditionalImages($this->imagesTransformer->transform($data[self::KEY_ADDITIONAL_IMAGES]));
+    }
+
+    /**
+     * @phpstan-param mixed[] $data
+     */
+    private function applyAddonServices(Item $item, array $data): void
+    {
+        if (empty($data[self::KEY_ADDON_SERVICES])) {
+            return;
+        }
+        if (!is_array($data[self::KEY_ADDON_SERVICES])) {
+            return;
+        }
+        $item->setAddonServices($this->addonServicesTransformer->transform($data[self::KEY_ADDON_SERVICES]));
     }
 
     /**
@@ -161,6 +233,48 @@ final class ItemTransformer implements ItemTransformerInterface
             return;
         }
         $item->setAgeGroup($data[self::KEY_AGE_GROUP]);
+    }
+
+    /**
+     * @phpstan-param mixed[] $data
+     */
+    private function applyAuthenticityGuarantee(Item $item, array $data): void
+    {
+        if (empty($data[self::KEY_AUTHENTICITY_GUARANTEE])) {
+            return;
+        }
+        if (!is_array($data[self::KEY_AUTHENTICITY_GUARANTEE])) {
+            return;
+        }
+        $item->setAuthenticityGuarantee($this->authenticityGuaranteeProgramTransformer->transform($data[self::KEY_AUTHENTICITY_GUARANTEE]));
+    }
+
+    /**
+     * @phpstan-param mixed[] $data
+     */
+    private function applyAuthenticityVerification(Item $item, array $data): void
+    {
+        if (empty($data[self::KEY_AUTHENTICITY_VERIFICATION])) {
+            return;
+        }
+        if (!is_array($data[self::KEY_AUTHENTICITY_VERIFICATION])) {
+            return;
+        }
+        $item->setAuthenticityVerification($this->authenticityVerificationProgramTransformer->transform($data[self::KEY_AUTHENTICITY_VERIFICATION]));
+    }
+
+    /**
+     * @phpstan-param mixed[] $data
+     */
+    private function applyAvailableCoupons(Item $item, array $data): void
+    {
+        if (empty($data[self::KEY_AVAILABLE_COUPONS])) {
+            return;
+        }
+        if (!is_array($data[self::KEY_AVAILABLE_COUPONS])) {
+            return;
+        }
+        $item->setAvailableCoupons($this->availableCouponsTransformer->transform($data[self::KEY_AVAILABLE_COUPONS]));
     }
 
     /**
@@ -250,6 +364,20 @@ final class ItemTransformer implements ItemTransformerInterface
     /**
      * @phpstan-param mixed[] $data
      */
+    private function applyCharityTerms(Item $item, array $data): void
+    {
+        if (empty($data[self::KEY_CHARITY_TERMS])) {
+            return;
+        }
+        if (!is_array($data[self::KEY_CHARITY_TERMS])) {
+            return;
+        }
+        $item->setCharityTerms($this->itemCharityTermsTransformer->transform($data[self::KEY_CHARITY_TERMS]));
+    }
+
+    /**
+     * @phpstan-param mixed[] $data
+     */
     private static function applyColor(Item $item, array $data): void
     {
         if (empty($data[self::KEY_COLOR])) {
@@ -292,6 +420,20 @@ final class ItemTransformer implements ItemTransformerInterface
     /**
      * @phpstan-param mixed[] $data
      */
+    private function applyConditionDescriptors(Item $item, array $data): void
+    {
+        if (empty($data[self::KEY_CONDITION_DESCRIPTORS])) {
+            return;
+        }
+        if (!is_array($data[self::KEY_CONDITION_DESCRIPTORS])) {
+            return;
+        }
+        $item->setConditionDescriptors($this->conditionDescriptorsTransformer->transform($data[self::KEY_CONDITION_DESCRIPTORS]));
+    }
+
+    /**
+     * @phpstan-param mixed[] $data
+     */
     private static function applyConditionId(Item $item, array $data): void
     {
         if (empty($data[self::KEY_CONDITION_ID])) {
@@ -329,6 +471,20 @@ final class ItemTransformer implements ItemTransformerInterface
             return;
         }
         $item->setDescription($data[self::KEY_DESCRIPTION]);
+    }
+
+    /**
+     * @phpstan-param mixed[] $data
+     */
+    private function applyEcoParticipationFee(Item $item, array $data): void
+    {
+        if (empty($data[self::KEY_ECO_PARTICIPATION_FEE])) {
+            return;
+        }
+        if (!is_array($data[self::KEY_ECO_PARTICIPATION_FEE])) {
+            return;
+        }
+        $item->setEcoParticipationFee($this->convertedAmountTransformer->transform($data[self::KEY_ECO_PARTICIPATION_FEE]));
     }
 
     /**
@@ -404,6 +560,20 @@ final class ItemTransformer implements ItemTransformerInterface
     /**
      * @phpstan-param mixed[] $data
      */
+    private static function applyGender(Item $item, array $data): void
+    {
+        if (empty($data[self::KEY_GENDER])) {
+            return;
+        }
+        if (!is_string($data[self::KEY_GENDER])) {
+            return;
+        }
+        $item->setGender($data[self::KEY_GENDER]);
+    }
+
+    /**
+     * @phpstan-param mixed[] $data
+     */
     private static function applyGtin(Item $item, array $data): void
     {
         if (empty($data[self::KEY_GTIN])) {
@@ -413,6 +583,20 @@ final class ItemTransformer implements ItemTransformerInterface
             return;
         }
         $item->setGtin($data[self::KEY_GTIN]);
+    }
+
+    /**
+     * @phpstan-param mixed[] $data
+     */
+    private function applyHazardousMaterialsLabels(Item $item, array $data): void
+    {
+        if (empty($data[self::KEY_HAZARDOUS_MATERIALS_LABELS])) {
+            return;
+        }
+        if (!is_array($data[self::KEY_HAZARDOUS_MATERIALS_LABELS])) {
+            return;
+        }
+        $item->setHazardousMaterialsLabels($this->hazardousMaterialsLabelsTransformer->transform($data[self::KEY_HAZARDOUS_MATERIALS_LABELS]));
     }
 
     /**
@@ -441,6 +625,20 @@ final class ItemTransformer implements ItemTransformerInterface
             return;
         }
         $item->setImmediatePay($data[self::KEY_IMMEDIATE_PAY]);
+    }
+
+    /**
+     * @phpstan-param mixed[] $data
+     */
+    private static function applyInferredEpid(Item $item, array $data): void
+    {
+        if (empty($data[self::KEY_INFERRED_EPID])) {
+            return;
+        }
+        if (!is_string($data[self::KEY_INFERRED_EPID])) {
+            return;
+        }
+        $item->setInferredEpid($data[self::KEY_INFERRED_EPID]);
     }
 
     /**
@@ -580,6 +778,20 @@ final class ItemTransformer implements ItemTransformerInterface
     /**
      * @phpstan-param mixed[] $data
      */
+    private function applyManufacturer(Item $item, array $data): void
+    {
+        if (empty($data[self::KEY_MANUFACTURER])) {
+            return;
+        }
+        if (!is_array($data[self::KEY_MANUFACTURER])) {
+            return;
+        }
+        $item->setManufacturer($this->companyAddressTransformer->transform($data[self::KEY_MANUFACTURER]));
+    }
+
+    /**
+     * @phpstan-param mixed[] $data
+     */
     private function applyMarketingPrice(Item $item, array $data): void
     {
         if (empty($data[self::KEY_MARKETING_PRICE])) {
@@ -608,6 +820,20 @@ final class ItemTransformer implements ItemTransformerInterface
     /**
      * @phpstan-param mixed[] $data
      */
+    private function applyMinimumPriceToBid(Item $item, array $data): void
+    {
+        if (empty($data[self::KEY_MINIMUM_PRICE_TO_BID])) {
+            return;
+        }
+        if (!is_array($data[self::KEY_MINIMUM_PRICE_TO_BID])) {
+            return;
+        }
+        $item->setMinimumPriceToBid($this->convertedAmountTransformer->transform($data[self::KEY_MINIMUM_PRICE_TO_BID]));
+    }
+
+    /**
+     * @phpstan-param mixed[] $data
+     */
     private static function applyMpn(Item $item, array $data): void
     {
         if (empty($data[self::KEY_MPN])) {
@@ -617,6 +843,20 @@ final class ItemTransformer implements ItemTransformerInterface
             return;
         }
         $item->setMpn($data[self::KEY_MPN]);
+    }
+
+    /**
+     * @phpstan-param mixed[] $data
+     */
+    private static function applyPattern(Item $item, array $data): void
+    {
+        if (empty($data[self::KEY_PATTERN])) {
+            return;
+        }
+        if (!is_string($data[self::KEY_PATTERN])) {
+            return;
+        }
+        $item->setPattern($data[self::KEY_PATTERN]);
     }
 
     /**
@@ -650,6 +890,48 @@ final class ItemTransformer implements ItemTransformerInterface
     /**
      * @phpstan-param mixed[] $data
      */
+    private static function applyPriceDisplayCondition(Item $item, array $data): void
+    {
+        if (empty($data[self::KEY_PRICE_DISPLAY_CONDITION])) {
+            return;
+        }
+        if (!is_string($data[self::KEY_PRICE_DISPLAY_CONDITION])) {
+            return;
+        }
+        $item->setPriceDisplayCondition($data[self::KEY_PRICE_DISPLAY_CONDITION]);
+    }
+
+    /**
+     * @phpstan-param mixed[] $data
+     */
+    private function applyPrimaryItemGroup(Item $item, array $data): void
+    {
+        if (empty($data[self::KEY_PRIMARY_ITEM_GROUP])) {
+            return;
+        }
+        if (!is_array($data[self::KEY_PRIMARY_ITEM_GROUP])) {
+            return;
+        }
+        $item->setPrimaryItemGroup($this->itemGroupSummaryTransformer->transform($data[self::KEY_PRIMARY_ITEM_GROUP]));
+    }
+
+    /**
+     * @phpstan-param mixed[] $data
+     */
+    private function applyPrimaryProductReviewRating(Item $item, array $data): void
+    {
+        if (empty($data[self::KEY_PRIMARY_PRODUCT_REVIEW_RATING])) {
+            return;
+        }
+        if (!is_array($data[self::KEY_PRIMARY_PRODUCT_REVIEW_RATING])) {
+            return;
+        }
+        $item->setPrimaryProductReviewRating($this->reviewRatingTransformer->transform($data[self::KEY_PRIMARY_PRODUCT_REVIEW_RATING]));
+    }
+
+    /**
+     * @phpstan-param mixed[] $data
+     */
     private static function applyPriorityListing(Item $item, array $data): void
     {
         if (!isset($data[self::KEY_PRIORITY_LISTING])) {
@@ -678,6 +960,104 @@ final class ItemTransformer implements ItemTransformerInterface
     /**
      * @phpstan-param mixed[] $data
      */
+    private static function applyProductFicheWebUrl(Item $item, array $data): void
+    {
+        if (empty($data[self::KEY_PRODUCT_FICHE_WEB_URL])) {
+            return;
+        }
+        if (!is_string($data[self::KEY_PRODUCT_FICHE_WEB_URL])) {
+            return;
+        }
+        $item->setProductFicheWebUrl($data[self::KEY_PRODUCT_FICHE_WEB_URL]);
+    }
+
+    /**
+     * @phpstan-param mixed[] $data
+     */
+    private function applyProductSafetyLabels(Item $item, array $data): void
+    {
+        if (empty($data[self::KEY_PRODUCT_SAFETY_LABELS])) {
+            return;
+        }
+        if (!is_array($data[self::KEY_PRODUCT_SAFETY_LABELS])) {
+            return;
+        }
+        $item->setProductSafetyLabels($this->productSafetyLabelsTransformer->transform($data[self::KEY_PRODUCT_SAFETY_LABELS]));
+    }
+
+    /**
+     * @phpstan-param mixed[] $data
+     */
+    private function applyQualifiedPrograms(Item $item, array $data): void
+    {
+        if (empty($data[self::KEY_QUALIFIED_PROGRAMS])) {
+            return;
+        }
+        if (!is_array($data[self::KEY_QUALIFIED_PROGRAMS])) {
+            return;
+        }
+        $item->setQualifiedPrograms($this->stringsTransformer->transform($data[self::KEY_QUALIFIED_PROGRAMS]));
+    }
+
+    /**
+     * @phpstan-param mixed[] $data
+     */
+    private static function applyQuantityLimitPerBuyer(Item $item, array $data): void
+    {
+        if (!isset($data[self::KEY_QUANTITY_LIMIT_PER_BUYER])) {
+            return;
+        }
+        if (!is_int($data[self::KEY_QUANTITY_LIMIT_PER_BUYER])) {
+            return;
+        }
+        $item->setQuantityLimitPerBuyer($data[self::KEY_QUANTITY_LIMIT_PER_BUYER]);
+    }
+
+    /**
+     * @phpstan-param mixed[] $data
+     */
+    private static function applyRepairScore(Item $item, array $data): void
+    {
+        if (empty($data[self::KEY_REPAIR_SCORE])) {
+            return;
+        }
+        if (!is_string($data[self::KEY_REPAIR_SCORE])) {
+            return;
+        }
+        $item->setRepairScore($data[self::KEY_REPAIR_SCORE]);
+    }
+
+    /**
+     * @phpstan-param mixed[] $data
+     */
+    private static function applyReservePriceMet(Item $item, array $data): void
+    {
+        if (!isset($data[self::KEY_RESERVE_PRICE_MET])) {
+            return;
+        }
+        if (!is_bool($data[self::KEY_RESERVE_PRICE_MET])) {
+            return;
+        }
+        $item->setReservePriceMet($data[self::KEY_RESERVE_PRICE_MET]);
+    }
+
+    /**
+     * @phpstan-param mixed[] $data
+     */
+    private function applyResponsiblePersons(Item $item, array $data): void
+    {
+        if (empty($data[self::KEY_RESPONSIBLE_PERSONS])) {
+            return;
+        }
+        if (!is_array($data[self::KEY_RESPONSIBLE_PERSONS])) {
+            return;
+        }
+        $item->setResponsiblePersons($this->responsiblePersonsTransformer->transform($data[self::KEY_RESPONSIBLE_PERSONS]));
+    }
+
+    /**
+     * @phpstan-param mixed[] $data
+     */
     private function applyReturnTerms(Item $item, array $data): void
     {
         if (empty($data[self::KEY_RETURN_TERMS])) {
@@ -701,6 +1081,20 @@ final class ItemTransformer implements ItemTransformerInterface
             return;
         }
         $item->setSeller($this->sellerTransformer->transform($data[self::KEY_SELLER]));
+    }
+
+    /**
+     * @phpstan-param mixed[] $data
+     */
+    private function applySellerCustomPolicies(Item $item, array $data): void
+    {
+        if (empty($data[self::KEY_SELLER_CUSTOM_POLICIES])) {
+            return;
+        }
+        if (!is_array($data[self::KEY_SELLER_CUSTOM_POLICIES])) {
+            return;
+        }
+        $item->setSellerCustomPolicies($this->sellerCustomPoliciesTransformer->transform($data[self::KEY_SELLER_CUSTOM_POLICIES]));
     }
 
     /**
@@ -762,6 +1156,48 @@ final class ItemTransformer implements ItemTransformerInterface
     /**
      * @phpstan-param mixed[] $data
      */
+    private static function applySize(Item $item, array $data): void
+    {
+        if (empty($data[self::KEY_SIZE])) {
+            return;
+        }
+        if (!is_string($data[self::KEY_SIZE])) {
+            return;
+        }
+        $item->setSize($data[self::KEY_SIZE]);
+    }
+
+    /**
+     * @phpstan-param mixed[] $data
+     */
+    private static function applySizeSystem(Item $item, array $data): void
+    {
+        if (empty($data[self::KEY_SIZE_SYSTEM])) {
+            return;
+        }
+        if (!is_string($data[self::KEY_SIZE_SYSTEM])) {
+            return;
+        }
+        $item->setSizeSystem($data[self::KEY_SIZE_SYSTEM]);
+    }
+
+    /**
+     * @phpstan-param mixed[] $data
+     */
+    private static function applySizeType(Item $item, array $data): void
+    {
+        if (empty($data[self::KEY_SIZE_TYPE])) {
+            return;
+        }
+        if (!is_string($data[self::KEY_SIZE_TYPE])) {
+            return;
+        }
+        $item->setSizeType($data[self::KEY_SIZE_TYPE]);
+    }
+
+    /**
+     * @phpstan-param mixed[] $data
+     */
     private static function applySubtitle(Item $item, array $data): void
     {
         if (empty($data[self::KEY_SUBTITLE])) {
@@ -771,6 +1207,20 @@ final class ItemTransformer implements ItemTransformerInterface
             return;
         }
         $item->setSubtitle($data[self::KEY_SUBTITLE]);
+    }
+
+    /**
+     * @phpstan-param mixed[] $data
+     */
+    private function applyTaxes(Item $item, array $data): void
+    {
+        if (empty($data[self::KEY_TAXES])) {
+            return;
+        }
+        if (!is_array($data[self::KEY_TAXES])) {
+            return;
+        }
+        $item->setTaxes($this->taxesTransformer->transform($data[self::KEY_TAXES]));
     }
 
     /**
@@ -799,6 +1249,20 @@ final class ItemTransformer implements ItemTransformerInterface
             return;
         }
         $item->setTopRatedBuyingExperience($data[self::KEY_TOP_RATED_BUYING_EXPERIENCE]);
+    }
+
+    /**
+     * @phpstan-param mixed[] $data
+     */
+    private static function applyTyreLabelImageUrl(Item $item, array $data): void
+    {
+        if (empty($data[self::KEY_TYRE_LABEL_IMAGE_URL])) {
+            return;
+        }
+        if (!is_string($data[self::KEY_TYRE_LABEL_IMAGE_URL])) {
+            return;
+        }
+        $item->setTyreLabelImageUrl($data[self::KEY_TYRE_LABEL_IMAGE_URL]);
     }
 
     /**
@@ -855,5 +1319,19 @@ final class ItemTransformer implements ItemTransformerInterface
             return;
         }
         $item->setWarnings($this->errorsTransformer->transform($data[self::KEY_WARNINGS]));
+    }
+
+    /**
+     * @phpstan-param mixed[] $data
+     */
+    private static function applyWatchCount(Item $item, array $data): void
+    {
+        if (!isset($data[self::KEY_WATCH_COUNT])) {
+            return;
+        }
+        if (!is_int($data[self::KEY_WATCH_COUNT])) {
+            return;
+        }
+        $item->setWatchCount($data[self::KEY_WATCH_COUNT]);
     }
 }
