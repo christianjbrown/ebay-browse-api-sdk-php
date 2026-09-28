@@ -16,10 +16,12 @@ use function strtotime;
 final class ShippingOptionTransformer implements ShippingOptionTransformerInterface
 {
     private ConvertedAmountTransformerInterface $convertedAmountTransformer;
+    private ShipToLocationTransformerInterface $shipToLocationTransformer;
 
-    public function __construct(ConvertedAmountTransformerInterface $convertedAmountTransformer)
+    public function __construct(ConvertedAmountTransformerInterface $convertedAmountTransformer, ShipToLocationTransformerInterface $shipToLocationTransformer)
     {
         $this->convertedAmountTransformer = $convertedAmountTransformer;
+        $this->shipToLocationTransformer = $shipToLocationTransformer;
     }
 
     /**
@@ -31,6 +33,7 @@ final class ShippingOptionTransformer implements ShippingOptionTransformerInterf
 
         $this->applyAdditionalShippingCostPerUnit($shippingOption, $data);
         self::applyCutOffDateUsedForEstimate($shippingOption, $data);
+        self::applyFulfilledThrough($shippingOption, $data);
         self::applyGuaranteedDelivery($shippingOption, $data);
         $this->applyImportCharges($shippingOption, $data);
         self::applyMaxEstimatedDeliveryDate($shippingOption, $data);
@@ -40,6 +43,8 @@ final class ShippingOptionTransformer implements ShippingOptionTransformerInterf
         $this->applyShippingCost($shippingOption, $data);
         self::applyShippingCostType($shippingOption, $data);
         self::applyShippingServiceCode($shippingOption, $data);
+        $this->applyShipToLocationUsedForEstimate($shippingOption, $data);
+        self::applyTrademarkSymbol($shippingOption, $data);
         self::applyType($shippingOption, $data);
 
         return $shippingOption;
@@ -75,6 +80,20 @@ final class ShippingOptionTransformer implements ShippingOptionTransformerInterf
             return;
         }
         $shippingOption->setCutOffDateUsedForEstimate($timestamp);
+    }
+
+    /**
+     * @phpstan-param mixed[] $data
+     */
+    private static function applyFulfilledThrough(ShippingOption $shippingOption, array $data): void
+    {
+        if (empty($data[self::KEY_FULFILLED_THROUGH])) {
+            return;
+        }
+        if (!is_string($data[self::KEY_FULFILLED_THROUGH])) {
+            return;
+        }
+        $shippingOption->setFulfilledThrough($data[self::KEY_FULFILLED_THROUGH]);
     }
 
     /**
@@ -209,6 +228,34 @@ final class ShippingOptionTransformer implements ShippingOptionTransformerInterf
             return;
         }
         $shippingOption->setShippingServiceCode($data[self::KEY_SHIPPING_SERVICE_CODE]);
+    }
+
+    /**
+     * @phpstan-param mixed[] $data
+     */
+    private function applyShipToLocationUsedForEstimate(ShippingOption $shippingOption, array $data): void
+    {
+        if (empty($data[self::KEY_SHIP_TO_LOCATION_USED_FOR_ESTIMATE])) {
+            return;
+        }
+        if (!is_array($data[self::KEY_SHIP_TO_LOCATION_USED_FOR_ESTIMATE])) {
+            return;
+        }
+        $shippingOption->setShipToLocationUsedForEstimate($this->shipToLocationTransformer->transform($data[self::KEY_SHIP_TO_LOCATION_USED_FOR_ESTIMATE]));
+    }
+
+    /**
+     * @phpstan-param mixed[] $data
+     */
+    private static function applyTrademarkSymbol(ShippingOption $shippingOption, array $data): void
+    {
+        if (empty($data[self::KEY_TRADEMARK_SYMBOL])) {
+            return;
+        }
+        if (!is_string($data[self::KEY_TRADEMARK_SYMBOL])) {
+            return;
+        }
+        $shippingOption->setTrademarkSymbol($data[self::KEY_TRADEMARK_SYMBOL]);
     }
 
     /**

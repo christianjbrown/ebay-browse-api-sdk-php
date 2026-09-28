@@ -9,6 +9,8 @@ final class Seller implements SellerInterface
     private ?string $feedbackPercentage = null;
     private ?int $feedbackScore = null;
     private ?string $sellerAccountType = null;
+    private ?SellerLegalInfoInterface $sellerLegalInfo = null;
+    private ?string $userId = null;
     private string $username;
 
     public function __construct(string $username)
@@ -29,6 +31,16 @@ final class Seller implements SellerInterface
     public function getSellerAccountType(): ?string
     {
         return $this->sellerAccountType;
+    }
+
+    public function getSellerLegalInfo(): ?SellerLegalInfoInterface
+    {
+        return $this->sellerLegalInfo;
+    }
+
+    public function getUserId(): ?string
+    {
+        return $this->userId;
     }
 
     public function getUsername(): string
@@ -53,6 +65,20 @@ final class Seller implements SellerInterface
     public function setSellerAccountType(?string $value): SellerInterface
     {
         $this->sellerAccountType = $value;
+
+        return $this;
+    }
+
+    public function setSellerLegalInfo(?SellerLegalInfoInterface $value): SellerInterface
+    {
+        $this->sellerLegalInfo = $value;
+
+        return $this;
+    }
+
+    public function setUserId(?string $value): SellerInterface
+    {
+        $this->userId = $value;
 
         return $this;
     }

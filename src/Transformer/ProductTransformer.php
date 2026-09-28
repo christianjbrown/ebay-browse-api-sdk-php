@@ -12,12 +12,16 @@ use function is_string;
 
 final class ProductTransformer implements ProductTransformerInterface
 {
+    private AdditionalProductIdentitiesTransformerInterface $additionalProductIdentitiesTransformer;
+    private AspectGroupsTransformerInterface $aspectGroupsTransformer;
     private ImagesTransformerInterface $imagesTransformer;
     private ImageTransformerInterface $imageTransformer;
     private StringsTransformerInterface $stringsTransformer;
 
-    public function __construct(ImageTransformerInterface $imageTransformer, ImagesTransformerInterface $imagesTransformer, StringsTransformerInterface $stringsTransformer)
+    public function __construct(AdditionalProductIdentitiesTransformerInterface $additionalProductIdentitiesTransformer, AspectGroupsTransformerInterface $aspectGroupsTransformer, ImageTransformerInterface $imageTransformer, ImagesTransformerInterface $imagesTransformer, StringsTransformerInterface $stringsTransformer)
     {
+        $this->additionalProductIdentitiesTransformer = $additionalProductIdentitiesTransformer;
+        $this->aspectGroupsTransformer = $aspectGroupsTransformer;
         $this->imageTransformer = $imageTransformer;
         $this->imagesTransformer = $imagesTransformer;
         $this->stringsTransformer = $stringsTransformer;
@@ -31,11 +35,14 @@ final class ProductTransformer implements ProductTransformerInterface
         $product = new Product();
 
         $this->applyAdditionalImages($product, $data);
+        $this->applyAdditionalProductIdentities($product, $data);
+        $this->applyAspectGroups($product, $data);
         self::applyBrand($product, $data);
         self::applyDescription($product, $data);
         $this->applyGtins($product, $data);
         $this->applyImage($product, $data);
         self::applyMpn($product, $data);
+        $this->applyMpns($product, $data);
         self::applyTitle($product, $data);
 
         return $product;
@@ -53,6 +60,34 @@ final class ProductTransformer implements ProductTransformerInterface
             return;
         }
         $product->setAdditionalImages($this->imagesTransformer->transform($data[self::KEY_ADDITIONAL_IMAGES]));
+    }
+
+    /**
+     * @phpstan-param mixed[] $data
+     */
+    private function applyAdditionalProductIdentities(Product $product, array $data): void
+    {
+        if (empty($data[self::KEY_ADDITIONAL_PRODUCT_IDENTITIES])) {
+            return;
+        }
+        if (!is_array($data[self::KEY_ADDITIONAL_PRODUCT_IDENTITIES])) {
+            return;
+        }
+        $product->setAdditionalProductIdentities($this->additionalProductIdentitiesTransformer->transform($data[self::KEY_ADDITIONAL_PRODUCT_IDENTITIES]));
+    }
+
+    /**
+     * @phpstan-param mixed[] $data
+     */
+    private function applyAspectGroups(Product $product, array $data): void
+    {
+        if (empty($data[self::KEY_ASPECT_GROUPS])) {
+            return;
+        }
+        if (!is_array($data[self::KEY_ASPECT_GROUPS])) {
+            return;
+        }
+        $product->setAspectGroups($this->aspectGroupsTransformer->transform($data[self::KEY_ASPECT_GROUPS]));
     }
 
     /**
@@ -123,6 +158,20 @@ final class ProductTransformer implements ProductTransformerInterface
             return;
         }
         $product->setMpn($data[self::KEY_MPN]);
+    }
+
+    /**
+     * @phpstan-param mixed[] $data
+     */
+    private function applyMpns(Product $product, array $data): void
+    {
+        if (empty($data[self::KEY_MPNS])) {
+            return;
+        }
+        if (!is_array($data[self::KEY_MPNS])) {
+            return;
+        }
+        $product->setMpns($this->stringsTransformer->transform($data[self::KEY_MPNS]));
     }
 
     /**

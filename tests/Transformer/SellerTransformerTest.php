@@ -7,6 +7,8 @@ namespace ChristianBrown\EBay\Browse\Tests\Transformer;
 use ChristianBrown\EBay\Browse\Exception\UnexpectedResponseException;
 use ChristianBrown\EBay\Browse\Model\Seller;
 use ChristianBrown\EBay\Browse\Model\SellerInterface;
+use ChristianBrown\EBay\Browse\Model\SellerLegalInfoInterface;
+use ChristianBrown\EBay\Browse\Transformer\SellerLegalInfoTransformerInterface;
 use ChristianBrown\EBay\Browse\Transformer\SellerTransformer;
 use ChristianBrown\EBay\Browse\Transformer\SellerTransformerInterface;
 use Closure;
@@ -21,6 +23,8 @@ use function sprintf;
 #[CoversClass(SellerTransformer::class)]
 final class SellerTransformerTest extends TestCase
 {
+    private ?SellerLegalInfoInterface $sellerLegalInfo = null;
+
     public function testTransform(): void
     {
         $data = [
@@ -28,6 +32,8 @@ final class SellerTransformerTest extends TestCase
             SellerTransformerInterface::KEY_FEEDBACK_PERCENTAGE => 'v_1',
             SellerTransformerInterface::KEY_FEEDBACK_SCORE => 102,
             SellerTransformerInterface::KEY_SELLER_ACCOUNT_TYPE => 'v_3',
+            SellerTransformerInterface::KEY_SELLER_LEGAL_INFO => ['raw_sellerLegalInfo'],
+            SellerTransformerInterface::KEY_USER_ID => 'v_4',
         ];
 
         $transformer = $this->buildTransformer();
@@ -38,6 +44,8 @@ final class SellerTransformerTest extends TestCase
         self::assertSame('v_1', $actual->getFeedbackPercentage());
         self::assertSame(102, $actual->getFeedbackScore());
         self::assertSame('v_3', $actual->getSellerAccountType());
+        self::assertSame($this->sellerLegalInfo, $actual->getSellerLegalInfo());
+        self::assertSame('v_4', $actual->getUserId());
     }
 
     /**
@@ -65,6 +73,8 @@ final class SellerTransformerTest extends TestCase
                 self::assertNull($model->getFeedbackPercentage());
                 self::assertNull($model->getFeedbackScore());
                 self::assertNull($model->getSellerAccountType());
+                self::assertNull($model->getSellerLegalInfo());
+                self::assertNull($model->getUserId());
             },
         ];
 
@@ -95,6 +105,20 @@ final class SellerTransformerTest extends TestCase
                 self::assertNull($model->getSellerAccountType());
             },
         ];
+
+        yield 'sellerLegalInfoWrongType' => [
+            [...$base, SellerTransformerInterface::KEY_SELLER_LEGAL_INFO => 'x'],
+            static function (SellerInterface $model): void {
+                self::assertNull($model->getSellerLegalInfo());
+            },
+        ];
+
+        yield 'userIdWrongType' => [
+            [...$base, SellerTransformerInterface::KEY_USER_ID => 42],
+            static function (SellerInterface $model): void {
+                self::assertNull($model->getUserId());
+            },
+        ];
     }
 
     /**
@@ -114,6 +138,11 @@ final class SellerTransformerTest extends TestCase
 
     private function buildTransformer(): SellerTransformer
     {
-        return new SellerTransformer();
+        $this->sellerLegalInfo = self::createStub(SellerLegalInfoInterface::class);
+
+        $sellerLegalInfoTransformer = self::createStub(SellerLegalInfoTransformerInterface::class);
+        $sellerLegalInfoTransformer->method('transform')->willReturn($this->sellerLegalInfo);
+
+        return new SellerTransformer($sellerLegalInfoTransformer);
     }
 }

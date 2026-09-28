@@ -27,11 +27,20 @@ interface ItemSummaryInterface
      */
     public function getCategories(): array;
 
+    public function getCompatibilityMatch(): ?string;
+
+    /**
+     * @return array<int, CompatibilityPropertyInterface>
+     */
+    public function getCompatibilityProperties(): array;
+
     public function getCondition(): ?string;
 
     public function getConditionId(): ?string;
 
     public function getCurrentBidPrice(): ?ConvertedAmountInterface;
+
+    public function getDistanceFromPickupLocation(): ?TargetLocationInterface;
 
     public function getEnergyEfficiencyClass(): ?string;
 
@@ -70,9 +79,21 @@ interface ItemSummaryInterface
 
     public function getMarketingPrice(): ?MarketingPriceInterface;
 
+    /**
+     * @return array<int, PickupOptionSummaryInterface>
+     */
+    public function getPickupOptions(): array;
+
     public function getPrice(): ?ConvertedAmountInterface;
 
+    public function getPriceDisplayCondition(): ?string;
+
     public function getPriorityListing(): ?bool;
+
+    /**
+     * @return array<int, string>
+     */
+    public function getQualifiedPrograms(): array;
 
     public function getSeller(): ?SellerInterface;
 
@@ -91,6 +112,8 @@ interface ItemSummaryInterface
     public function getTitle(): ?string;
 
     public function getTopRatedBuyingExperience(): ?bool;
+
+    public function getTyreLabelImageUrl(): ?string;
 
     public function getUnitPrice(): ?ConvertedAmountInterface;
 
@@ -119,11 +142,20 @@ interface ItemSummaryInterface
      */
     public function setCategories(array $value): self;
 
+    public function setCompatibilityMatch(?string $value): self;
+
+    /**
+     * @param array<int, CompatibilityPropertyInterface> $value
+     */
+    public function setCompatibilityProperties(array $value): self;
+
     public function setCondition(?string $value): self;
 
     public function setConditionId(?string $value): self;
 
     public function setCurrentBidPrice(?ConvertedAmountInterface $value): self;
+
+    public function setDistanceFromPickupLocation(?TargetLocationInterface $value): self;
 
     public function setEnergyEfficiencyClass(?string $value): self;
 
@@ -162,9 +194,21 @@ interface ItemSummaryInterface
 
     public function setMarketingPrice(?MarketingPriceInterface $value): self;
 
+    /**
+     * @param array<int, PickupOptionSummaryInterface> $value
+     */
+    public function setPickupOptions(array $value): self;
+
     public function setPrice(?ConvertedAmountInterface $value): self;
 
+    public function setPriceDisplayCondition(?string $value): self;
+
     public function setPriorityListing(?bool $value): self;
+
+    /**
+     * @param array<int, string> $value
+     */
+    public function setQualifiedPrograms(array $value): self;
 
     public function setSeller(?SellerInterface $value): self;
 
@@ -183,6 +227,8 @@ interface ItemSummaryInterface
     public function setTitle(?string $value): self;
 
     public function setTopRatedBuyingExperience(?bool $value): self;
+
+    public function setTyreLabelImageUrl(?string $value): self;
 
     public function setUnitPrice(?ConvertedAmountInterface $value): self;
 

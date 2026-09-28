@@ -8,6 +8,7 @@ final class ShippingOption implements ShippingOptionInterface
 {
     private ?ConvertedAmountInterface $additionalShippingCostPerUnit = null;
     private ?int $cutOffDateUsedForEstimate = null;
+    private ?string $fulfilledThrough = null;
     private ?bool $guaranteedDelivery = null;
     private ?ConvertedAmountInterface $importCharges = null;
     private ?int $maxEstimatedDeliveryDate = null;
@@ -17,6 +18,8 @@ final class ShippingOption implements ShippingOptionInterface
     private ?ConvertedAmountInterface $shippingCost = null;
     private ?string $shippingCostType = null;
     private ?string $shippingServiceCode = null;
+    private ?ShipToLocationInterface $shipToLocationUsedForEstimate = null;
+    private ?string $trademarkSymbol = null;
     private ?string $type = null;
 
     public function getAdditionalShippingCostPerUnit(): ?ConvertedAmountInterface
@@ -27,6 +30,11 @@ final class ShippingOption implements ShippingOptionInterface
     public function getCutOffDateUsedForEstimate(): ?int
     {
         return $this->cutOffDateUsedForEstimate;
+    }
+
+    public function getFulfilledThrough(): ?string
+    {
+        return $this->fulfilledThrough;
     }
 
     public function getGuaranteedDelivery(): ?bool
@@ -74,6 +82,16 @@ final class ShippingOption implements ShippingOptionInterface
         return $this->shippingServiceCode;
     }
 
+    public function getShipToLocationUsedForEstimate(): ?ShipToLocationInterface
+    {
+        return $this->shipToLocationUsedForEstimate;
+    }
+
+    public function getTrademarkSymbol(): ?string
+    {
+        return $this->trademarkSymbol;
+    }
+
     public function getType(): ?string
     {
         return $this->type;
@@ -89,6 +107,13 @@ final class ShippingOption implements ShippingOptionInterface
     public function setCutOffDateUsedForEstimate(?int $value): ShippingOptionInterface
     {
         $this->cutOffDateUsedForEstimate = $value;
+
+        return $this;
+    }
+
+    public function setFulfilledThrough(?string $value): ShippingOptionInterface
+    {
+        $this->fulfilledThrough = $value;
 
         return $this;
     }
@@ -152,6 +177,20 @@ final class ShippingOption implements ShippingOptionInterface
     public function setShippingServiceCode(?string $value): ShippingOptionInterface
     {
         $this->shippingServiceCode = $value;
+
+        return $this;
+    }
+
+    public function setShipToLocationUsedForEstimate(?ShipToLocationInterface $value): ShippingOptionInterface
+    {
+        $this->shipToLocationUsedForEstimate = $value;
+
+        return $this;
+    }
+
+    public function setTrademarkSymbol(?string $value): ShippingOptionInterface
+    {
+        $this->trademarkSymbol = $value;
 
         return $this;
     }

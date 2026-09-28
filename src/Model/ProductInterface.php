@@ -11,6 +11,16 @@ interface ProductInterface
      */
     public function getAdditionalImages(): array;
 
+    /**
+     * @return array<int, AdditionalProductIdentityInterface>
+     */
+    public function getAdditionalProductIdentities(): array;
+
+    /**
+     * @return array<int, AspectGroupInterface>
+     */
+    public function getAspectGroups(): array;
+
     public function getBrand(): ?string;
 
     public function getDescription(): ?string;
@@ -24,12 +34,27 @@ interface ProductInterface
 
     public function getMpn(): ?string;
 
+    /**
+     * @return array<int, string>
+     */
+    public function getMpns(): array;
+
     public function getTitle(): ?string;
 
     /**
      * @param array<int, ImageInterface> $value
      */
     public function setAdditionalImages(array $value): self;
+
+    /**
+     * @param array<int, AdditionalProductIdentityInterface> $value
+     */
+    public function setAdditionalProductIdentities(array $value): self;
+
+    /**
+     * @param array<int, AspectGroupInterface> $value
+     */
+    public function setAspectGroups(array $value): self;
 
     public function setBrand(?string $value): self;
 
@@ -43,6 +68,11 @@ interface ProductInterface
     public function setImage(?ImageInterface $value): self;
 
     public function setMpn(?string $value): self;
+
+    /**
+     * @param array<int, string> $value
+     */
+    public function setMpns(array $value): self;
 
     public function setTitle(?string $value): self;
 }

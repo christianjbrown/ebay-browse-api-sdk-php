@@ -13,10 +13,12 @@ use function is_string;
 final class PaymentMethodTransformer implements PaymentMethodTransformerInterface
 {
     private PaymentMethodBrandsTransformerInterface $paymentMethodBrandsTransformer;
+    private StringsTransformerInterface $stringsTransformer;
 
-    public function __construct(PaymentMethodBrandsTransformerInterface $paymentMethodBrandsTransformer)
+    public function __construct(PaymentMethodBrandsTransformerInterface $paymentMethodBrandsTransformer, StringsTransformerInterface $stringsTransformer)
     {
         $this->paymentMethodBrandsTransformer = $paymentMethodBrandsTransformer;
+        $this->stringsTransformer = $stringsTransformer;
     }
 
     /**
@@ -26,10 +28,26 @@ final class PaymentMethodTransformer implements PaymentMethodTransformerInterfac
     {
         $paymentMethod = new PaymentMethod();
 
+        $this->applyPaymentInstructions($paymentMethod, $data);
         $this->applyPaymentMethodBrands($paymentMethod, $data);
         self::applyPaymentMethodType($paymentMethod, $data);
+        $this->applySellerInstructions($paymentMethod, $data);
 
         return $paymentMethod;
+    }
+
+    /**
+     * @phpstan-param mixed[] $data
+     */
+    private function applyPaymentInstructions(PaymentMethod $paymentMethod, array $data): void
+    {
+        if (empty($data[self::KEY_PAYMENT_INSTRUCTIONS])) {
+            return;
+        }
+        if (!is_array($data[self::KEY_PAYMENT_INSTRUCTIONS])) {
+            return;
+        }
+        $paymentMethod->setPaymentInstructions($this->stringsTransformer->transform($data[self::KEY_PAYMENT_INSTRUCTIONS]));
     }
 
     /**
@@ -58,5 +76,19 @@ final class PaymentMethodTransformer implements PaymentMethodTransformerInterfac
             return;
         }
         $paymentMethod->setPaymentMethodType($data[self::KEY_PAYMENT_METHOD_TYPE]);
+    }
+
+    /**
+     * @phpstan-param mixed[] $data
+     */
+    private function applySellerInstructions(PaymentMethod $paymentMethod, array $data): void
+    {
+        if (empty($data[self::KEY_SELLER_INSTRUCTIONS])) {
+            return;
+        }
+        if (!is_array($data[self::KEY_SELLER_INSTRUCTIONS])) {
+            return;
+        }
+        $paymentMethod->setSellerInstructions($this->stringsTransformer->transform($data[self::KEY_SELLER_INSTRUCTIONS]));
     }
 }
