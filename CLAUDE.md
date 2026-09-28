@@ -175,9 +175,8 @@ The `phpunit.xml` config is strict (`requireCoverageMetadata`, `beStrictAboutCov
 ## Adding a feature (e.g. a new response field or endpoint)
 
 1. Confirm the real shape against the live API first — model on the JSON eBay actually returns, not
-   on the documentation. The production credentials live in Google Secret Manager
-   (`EBAY_OAUTH_CLIENT_ID` / `EBAY_OAUTH_CLIENT_SECRET` in the `underpinned` project); never commit
-   or print a secret.
+   on the documentation. Use your own eBay application's client id and secret, supplied at run time;
+   never commit or print a secret.
 2. Add the `Model` DTO + its interface (constants, if any, on the interface).
 3. Add the `Transformer` + its interface, with `KEY_*` and `*_SPRINTF` constants on the interface,
    plus a plural collection transformer if the field is a list.

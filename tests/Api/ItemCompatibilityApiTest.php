@@ -26,8 +26,8 @@ use function sprintf;
 #[CoversClass(ItemCompatibilityApi::class)]
 final class ItemCompatibilityApiTest extends TestCase
 {
-    private const string ITEM_ID = 'v1|203846989875|0';
-    private const string ITEM_URL = 'https://api.ebay.com/buy/browse/v1/item/v1%7C203846989875%7C0/check_compatibility';
+    private const string ITEM_ID = 'v1|123456789012|0';
+    private const string ITEM_URL = 'https://api.ebay.com/buy/browse/v1/item/v1%7C123456789012%7C0/check_compatibility';
 
     public function testCheck(): void
     {

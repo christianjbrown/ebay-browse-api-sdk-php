@@ -63,10 +63,10 @@ $compatibilityApi = $browse->getItemCompatibilityApi(); // ItemCompatibilityApiI
 
 ### :package: Reading one item
 
-`getOneById()` takes a Browse item id (`v1|203846989875|0`); `getOneByLegacyId()` takes the plain numeric id you see in an eBay URL and optionally a variation id or SKU.
+`getOneById()` takes a Browse item id (`v1|123456789012|0`); `getOneByLegacyId()` takes the plain numeric id you see in an eBay URL and optionally a variation id or SKU.
 
 ```php
-$item = $itemApi->getOneByLegacyId('203846989875');   // ItemInterface
+$item = $itemApi->getOneByLegacyId('123456789012');   // ItemInterface
 
 printf("%s — %s %s\n", $item->getTitle(), $item->getPrice()?->getValue(), $item->getPrice()?->getCurrency());
 printf("Seller: %s (%s%% of %d)\n",
@@ -88,7 +88,7 @@ foreach ($item->getEstimatedAvailabilities() as $availability) {
 `fieldgroups` is passed straight through, so `getOneById($itemId, 'PRODUCT')` adds the catalogue product block, and the multi-variation parent of a listing is read with:
 
 ```php
-$group = $itemApi->getMultipleByItemGroupId('800318966643');   // ItemGroupInterface
+$group = $itemApi->getMultipleByItemGroupId('987654321098');   // ItemGroupInterface
 
 foreach ($group->getItems() as $variation) {
     printf("%s — %s\n", $variation->getItemId(), $variation->getTitle());
@@ -101,8 +101,8 @@ foreach ($group->getItems() as $variation) {
 
 ```php
 $collection = $browse->getItemSummaryApi()->search(
-    q: 'nhs volunteer pin badge',
-    categoryIds: '60605',
+    q: 'vintage film camera',
+    categoryIds: '15230',
     filter: 'buyingOptions:{FIXED_PRICE},price:[1..25],priceCurrency:GBP',
     sort: 'price',
     fieldgroups: 'MATCHING_ITEMS,ASPECT_REFINEMENTS',
@@ -131,8 +131,8 @@ foreach ($collection->getRefinement()?->getAspectDistributions() ?? [] as $aspec
 
 ```php
 $collection = $browse->getItemSummaryApi()->searchByImage(
-    base64_encode(file_get_contents('badge.jpg')),
-    categoryIds: '60605',
+    base64_encode(file_get_contents('photo.jpg')),
+    categoryIds: '15230',
     limit: 10
 );
 ```
@@ -159,7 +159,7 @@ Everything this library throws implements `ChristianBrown\EBay\Browse\Exception\
 use ChristianBrown\EBay\Browse\Exception\ExceptionInterface;
 
 try {
-    $item = $itemApi->getOneByLegacyId('203802068557');
+    $item = $itemApi->getOneByLegacyId('210987654321');
 } catch (ExceptionInterface $exception) {
     // Anything this library throws lands here.
 }
