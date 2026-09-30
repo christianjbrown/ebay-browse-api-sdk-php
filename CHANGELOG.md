@@ -6,6 +6,12 @@ All notable changes to this package are recorded here. The format follows
 
 ## [Unreleased]
 
+## [1.1.1] - 2026-09-30
+
+### Changed
+
+- Allows christianjbrown/key-value-store 2.0 as well as 1.x. Nothing this package uses from it changed.
+
 ## [1.1.0] - 2026-09-28
 
 ### Added
@@ -48,6 +54,7 @@ First stable release.
   production and sandbox presets.
 - A single exception hierarchy, so callers do not depend on the underlying HTTP client.
 
-[Unreleased]: https://github.com/christianjbrown/ebay-browse-api-sdk-php/compare/v1.1.0...HEAD
+[Unreleased]: https://github.com/christianjbrown/ebay-browse-api-sdk-php/compare/v1.1.1...HEAD
+[1.1.1]: https://github.com/christianjbrown/ebay-browse-api-sdk-php/compare/v1.1.0...v1.1.1
 [1.1.0]: https://github.com/christianjbrown/ebay-browse-api-sdk-php/compare/v1.0.0...v1.1.0
 [1.0.0]: https://github.com/christianjbrown/ebay-browse-api-sdk-php/releases/tag/v1.0.0
