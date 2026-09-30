@@ -326,6 +326,12 @@ The `Browse` facade's registrars under `src/Container/` (`LeafTransformerService
 
 </details>
 
+## :memo: Changelog
+
+Notable changes in each release are listed in [CHANGELOG.md](CHANGELOG.md).
+
+
+
 ## :page_facing_up: License
 
 Released under the [MIT License](LICENSE).
