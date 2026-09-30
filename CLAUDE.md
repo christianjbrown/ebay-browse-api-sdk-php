@@ -55,6 +55,12 @@ then `./bin/php-coverage-check .phpunit.cache/coverage.txt`. Always run `compose
 (php-cs-fixer auto-fixes what it can), then `composer check-style` to surface any remaining
 violations that must be fixed by hand, then `composer stan` and `composer test` before finishing.
 
+## Changelog
+
+`CHANGELOG.md` follows Keep a Changelog. A pull request that changes `src/` must add a line under
+`## [Unreleased]`; CI enforces it with `bin/php-changelog-check`. A release renames that section to the
+version and the date, and its text becomes the GitHub release notes.
+
 ## Architecture
 
 Layers under `src/`, mirrored 1:1 under `tests/`, plus the top-level `Browse` facade. PSR-4:
