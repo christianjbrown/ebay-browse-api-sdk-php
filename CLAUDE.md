@@ -29,7 +29,7 @@ gitignored and Composer-installed, so run `composer install` first.
 | Task | Command |
 | --- | --- |
 | Run tests + coverage (opens HTML report) | `composer test` |
-| Run tests, no coverage | `php -d memory_limit=-1 ./bin/phpunit --no-coverage` |
+| Run tests, no coverage | `php -d memory_limit=-1 ./bin/paratest --no-coverage` |
 | Run one test | `php -d memory_limit=-1 ./bin/phpunit --filter ItemTransformerTest` |
 | Static analysis | `composer stan` |
 | Check code style | `composer check-style` |
@@ -44,16 +44,24 @@ PSR/PEAR/Squiz/Generic), and **php-cs-fixer** (`@PhpCsFixer`/`@Symfony`) handles
 `bin/php-cs*` scripts are thin wrappers over it. Static analysis is **PHPStan at `level: max`**
 (`phpstan.neon.dist`). Note the `--memory-limit=1G` in the `stan` script and in CI: this project has
 enough files that PHPStan's parallel workers exhaust the default 128M on a cold cache. There is a
-**GitHub Actions CI workflow** (`.github/workflows/ci.yml`) that runs style, PHPStan and the PHPUnit
-suite with coverage on every push/PR; every dependency is a public GitHub repository, so it needs no
+**GitHub Actions CI workflow** (`.github/workflows/ci.yml`) that runs style, PHPStan and the test
+suite (under ParaTest) with coverage on every push/PR; every dependency is a public GitHub repository, so it needs no
 `COMPOSER_AUTH`. After the coverage run, a final **"Enforce 100% coverage"** step runs
 `./bin/php-coverage-check .phpunit.cache/coverage.txt` (from `christianjbrown/code-quality-scripts`)
 against the text report the previous step wrote, and fails the build if anything is below 100%. Run
 the same two commands locally before pushing:
-`XDEBUG_MODE=coverage php -d memory_limit=-1 ./bin/phpunit --coverage-text=.phpunit.cache/coverage.txt`
+`XDEBUG_MODE=coverage php -d memory_limit=-1 ./bin/paratest --processes=$(getconf _NPROCESSORS_ONLN) --max-batch-size=150 --passthru-php="-d memory_limit=-1" --coverage-text=.phpunit.cache/coverage.txt`
 then `./bin/php-coverage-check .phpunit.cache/coverage.txt`. Always run `composer fix-style` first
 (php-cs-fixer auto-fixes what it can), then `composer check-style` to surface any remaining
 violations that must be fixed by hand, then `composer stan` and `composer test` before finishing.
+
+Tests run under **ParaTest** (`./bin/paratest`), one worker per core (`composer test` detects the core
+count; CI uses `nproc`) with `--max-batch-size=150`. Do not run the whole suite with plain phpunit and
+path coverage: coverage bookkeeping grows with every test held in one process, so a single process
+takes over ten minutes, while short-lived workers take a fraction of that. `phpunit.xml` declares no
+report, so ask for one on the command line (`--coverage-text=<file>`, plus `--coverage-html=<dir>`
+locally). Workers need `--passthru-php="-d memory_limit=-1"` because they do not inherit the parent's
+`php -d` options. Plain `./bin/phpunit --filter ...` is still fine for running one test.
 
 ## Changelog
 
