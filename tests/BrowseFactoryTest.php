@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace ChristianBrown\EBay\Browse\Tests;
 
 use ChristianBrown\EBay\Browse\Api\ItemApi;
-use ChristianBrown\EBay\Browse\Api\ItemApiInterface;
 use ChristianBrown\EBay\Browse\Api\ItemCompatibilityApi;
 use ChristianBrown\EBay\Browse\Api\ItemCompatibilityApiInterface;
 use ChristianBrown\EBay\Browse\Api\ItemSummaryApi;
@@ -75,17 +74,9 @@ use ChristianBrown\EBay\Browse\Transformer\HazardStatementTransformer;
 use ChristianBrown\EBay\Browse\Transformer\ImagesTransformer;
 use ChristianBrown\EBay\Browse\Transformer\ImageTransformer;
 use ChristianBrown\EBay\Browse\Transformer\ItemCharityTermsTransformer;
-use ChristianBrown\EBay\Browse\Transformer\ItemComplianceTransformer;
-use ChristianBrown\EBay\Browse\Transformer\ItemConditionTransformer;
-use ChristianBrown\EBay\Browse\Transformer\ItemDescriptionTransformer;
-use ChristianBrown\EBay\Browse\Transformer\ItemFulfilmentTransformer;
 use ChristianBrown\EBay\Browse\Transformer\ItemGroupSummaryTransformer;
 use ChristianBrown\EBay\Browse\Transformer\ItemGroupTransformer;
-use ChristianBrown\EBay\Browse\Transformer\ItemListingTransformer;
 use ChristianBrown\EBay\Browse\Transformer\ItemLocationTransformer;
-use ChristianBrown\EBay\Browse\Transformer\ItemMediaTransformer;
-use ChristianBrown\EBay\Browse\Transformer\ItemPricingTransformer;
-use ChristianBrown\EBay\Browse\Transformer\ItemProductTransformer;
 use ChristianBrown\EBay\Browse\Transformer\ItemsResponseTransformer;
 use ChristianBrown\EBay\Browse\Transformer\ItemsTransformer;
 use ChristianBrown\EBay\Browse\Transformer\ItemSummariesTransformer;
@@ -183,14 +174,6 @@ use Symfony\Component\Clock\MockClock;
 #[UsesClass(ItemSummariesTransformer::class)]
 #[UsesClass(ItemSummaryApi::class)]
 #[UsesClass(ItemSummaryTransformer::class)]
-#[UsesClass(ItemDescriptionTransformer::class)]
-#[UsesClass(ItemConditionTransformer::class)]
-#[UsesClass(ItemMediaTransformer::class)]
-#[UsesClass(ItemPricingTransformer::class)]
-#[UsesClass(ItemFulfilmentTransformer::class)]
-#[UsesClass(ItemListingTransformer::class)]
-#[UsesClass(ItemProductTransformer::class)]
-#[UsesClass(ItemComplianceTransformer::class)]
 #[UsesClass(ItemTransformer::class)]
 #[UsesClass(ItemsTransformer::class)]
 #[UsesClass(LeafTransformerServiceRegistrar::class)]
@@ -271,25 +254,6 @@ use Symfony\Component\Clock\MockClock;
 #[UsesClass(VatDetailsTransformer::class)]
 final class BrowseFactoryTest extends TestCase
 {
-    public function testItemApi(): void
-    {
-        self::assertInstanceOf(ItemApiInterface::class, $this->buildBrowse()->getItemApi());
-    }
-
-    public function testItemApiReturnsSharedInstance(): void
-    {
-        $browse = $this->buildBrowse();
-
-        self::assertSame($browse->getItemApi(), $browse->getItemApi());
-    }
-
-    public function testItemApiWithASandboxApiHost(): void
-    {
-        $browse = (new BrowseFactory(ApiHost::sandbox()))->create('test-client-id', 'test-client-secret', new Marketplace(MarketplaceId::EBAY_GB), new MemoryKeyValueStore(new MockClock()));
-
-        self::assertInstanceOf(ItemApiInterface::class, $browse->getItemApi());
-    }
-
     public function testItemCompatibilityApi(): void
     {
         self::assertInstanceOf(ItemCompatibilityApiInterface::class, $this->buildBrowse()->getItemCompatibilityApi());
@@ -312,6 +276,13 @@ final class BrowseFactoryTest extends TestCase
         $browse = $this->buildBrowse();
 
         self::assertSame($browse->getItemSummaryApi(), $browse->getItemSummaryApi());
+    }
+
+    public function testItemSummaryApiWithASandboxApiHost(): void
+    {
+        $browse = (new BrowseFactory(ApiHost::sandbox()))->create('test-client-id', 'test-client-secret', new Marketplace(MarketplaceId::EBAY_GB), new MemoryKeyValueStore(new MockClock()));
+
+        self::assertInstanceOf(ItemSummaryApiInterface::class, $browse->getItemSummaryApi());
     }
 
     private function buildBrowse(): BrowseInterface

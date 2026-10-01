@@ -86,4 +86,44 @@ final class ApiClientServiceRegistrarTest extends TestCase
         self::assertSame($itemsCache, $itemApiDefinition->getArgument(9));
         self::assertSame($itemSummarySearchCache, $itemSummaryApiDefinition->getArgument(4));
     }
+
+    public function testRegisteredGraphCompilesWithEveryReferenceResolvable(): void
+    {
+        $apiHost = ApiHost::production();
+
+        /**
+         * @var ArrayKeyedCache<ItemInterface> $itemOneCache
+         */
+        $itemOneCache = new ArrayKeyedCache();
+
+        /**
+         * @var ArrayKeyedCache<ItemInterface> $itemLegacyCache
+         */
+        $itemLegacyCache = new ArrayKeyedCache();
+
+        /**
+         * @var ArrayKeyedCache<ItemGroupInterface> $itemGroupCache
+         */
+        $itemGroupCache = new ArrayKeyedCache();
+
+        /**
+         * @var ArrayKeyedCache<SearchPagedCollectionInterface> $itemSummarySearchCache
+         */
+        $itemSummarySearchCache = new ArrayKeyedCache();
+
+        /**
+         * @var ArrayKeyedCache<ItemsResponseInterface> $itemsCache
+         */
+        $itemsCache = new ArrayKeyedCache();
+
+        $container = new ContainerBuilder();
+        (new CoreServiceRegistrar('client-id', 'client-secret', new Marketplace(MarketplaceId::EBAY_GB), new MemoryKeyValueStore(new MockClock()), $apiHost, (new ApiClientFactory(new ClientOptions()))->create(), new ClientCredentialsTokenManagerFactory(new MockClock()), new NullLock()))->register($container);
+        (new LeafTransformerServiceRegistrar())->register($container);
+        (new ComposedTransformerServiceRegistrar())->register($container);
+        (new ApiClientServiceRegistrar($apiHost, $itemOneCache, $itemLegacyCache, $itemGroupCache, $itemSummarySearchCache, $itemsCache))->register($container);
+
+        $container->compile();
+
+        self::assertTrue($container->isCompiled());
+    }
 }
