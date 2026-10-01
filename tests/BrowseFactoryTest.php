@@ -12,6 +12,8 @@ use ChristianBrown\EBay\Browse\Api\ItemSummaryApi;
 use ChristianBrown\EBay\Browse\Api\ItemSummaryApiInterface;
 use ChristianBrown\EBay\Browse\Auth\Credentials;
 use ChristianBrown\EBay\Browse\Browse;
+use ChristianBrown\EBay\Browse\BrowseFactory;
+use ChristianBrown\EBay\Browse\BrowseInterface;
 use ChristianBrown\EBay\Browse\Cache\ArrayKeyedCache;
 use ChristianBrown\EBay\Browse\Container\ApiClientServiceRegistrar;
 use ChristianBrown\EBay\Browse\Container\ComposedTransformerServiceRegistrar;
@@ -73,9 +75,17 @@ use ChristianBrown\EBay\Browse\Transformer\HazardStatementTransformer;
 use ChristianBrown\EBay\Browse\Transformer\ImagesTransformer;
 use ChristianBrown\EBay\Browse\Transformer\ImageTransformer;
 use ChristianBrown\EBay\Browse\Transformer\ItemCharityTermsTransformer;
+use ChristianBrown\EBay\Browse\Transformer\ItemComplianceTransformer;
+use ChristianBrown\EBay\Browse\Transformer\ItemConditionTransformer;
+use ChristianBrown\EBay\Browse\Transformer\ItemDescriptionTransformer;
+use ChristianBrown\EBay\Browse\Transformer\ItemFulfilmentTransformer;
 use ChristianBrown\EBay\Browse\Transformer\ItemGroupSummaryTransformer;
 use ChristianBrown\EBay\Browse\Transformer\ItemGroupTransformer;
+use ChristianBrown\EBay\Browse\Transformer\ItemListingTransformer;
 use ChristianBrown\EBay\Browse\Transformer\ItemLocationTransformer;
+use ChristianBrown\EBay\Browse\Transformer\ItemMediaTransformer;
+use ChristianBrown\EBay\Browse\Transformer\ItemPricingTransformer;
+use ChristianBrown\EBay\Browse\Transformer\ItemProductTransformer;
 use ChristianBrown\EBay\Browse\Transformer\ItemsResponseTransformer;
 use ChristianBrown\EBay\Browse\Transformer\ItemsTransformer;
 use ChristianBrown\EBay\Browse\Transformer\ItemSummariesTransformer;
@@ -131,7 +141,8 @@ use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\UsesClass;
 use PHPUnit\Framework\TestCase;
 
-#[CoversClass(Browse::class)]
+#[CoversClass(BrowseFactory::class)]
+#[UsesClass(Browse::class)]
 #[UsesClass(ApiClientServiceRegistrar::class)]
 #[UsesClass(ApiHost::class)]
 #[UsesClass(ArrayKeyedCache::class)]
@@ -171,6 +182,14 @@ use PHPUnit\Framework\TestCase;
 #[UsesClass(ItemSummariesTransformer::class)]
 #[UsesClass(ItemSummaryApi::class)]
 #[UsesClass(ItemSummaryTransformer::class)]
+#[UsesClass(ItemDescriptionTransformer::class)]
+#[UsesClass(ItemConditionTransformer::class)]
+#[UsesClass(ItemMediaTransformer::class)]
+#[UsesClass(ItemPricingTransformer::class)]
+#[UsesClass(ItemFulfilmentTransformer::class)]
+#[UsesClass(ItemListingTransformer::class)]
+#[UsesClass(ItemProductTransformer::class)]
+#[UsesClass(ItemComplianceTransformer::class)]
 #[UsesClass(ItemTransformer::class)]
 #[UsesClass(ItemsTransformer::class)]
 #[UsesClass(LeafTransformerServiceRegistrar::class)]
@@ -249,7 +268,7 @@ use PHPUnit\Framework\TestCase;
 #[UsesClass(TaxesTransformer::class)]
 #[UsesClass(VatDetailTransformer::class)]
 #[UsesClass(VatDetailsTransformer::class)]
-final class BrowseTest extends TestCase
+final class BrowseFactoryTest extends TestCase
 {
     public function testItemApi(): void
     {
@@ -263,9 +282,9 @@ final class BrowseTest extends TestCase
         self::assertSame($browse->getItemApi(), $browse->getItemApi());
     }
 
-    public function testItemApiWithAnExplicitApiHost(): void
+    public function testItemApiWithASandboxApiHost(): void
     {
-        $browse = new Browse('test-client-id', 'test-client-secret', new Marketplace(MarketplaceId::EBAY_GB), new MemoryKeyValueStore(), ApiHost::sandbox());
+        $browse = (new BrowseFactory(ApiHost::sandbox()))->create('test-client-id', 'test-client-secret', new Marketplace(MarketplaceId::EBAY_GB), new MemoryKeyValueStore());
 
         self::assertInstanceOf(ItemApiInterface::class, $browse->getItemApi());
     }
@@ -294,8 +313,8 @@ final class BrowseTest extends TestCase
         self::assertSame($browse->getItemSummaryApi(), $browse->getItemSummaryApi());
     }
 
-    private function buildBrowse(): Browse
+    private function buildBrowse(): BrowseInterface
     {
-        return new Browse('test-client-id', 'test-client-secret', new Marketplace(MarketplaceId::EBAY_GB), new MemoryKeyValueStore());
+        return (new BrowseFactory(ApiHost::production()))->create('test-client-id', 'test-client-secret', new Marketplace(MarketplaceId::EBAY_GB), new MemoryKeyValueStore());
     }
 }
