@@ -57,12 +57,13 @@ use ChristianBrown\EBay\Browse\Enums\MarketplaceId;
 use ChristianBrown\EBay\Browse\Http\ApiHost;
 use ChristianBrown\EBay\Browse\Marketplace;
 use ChristianBrown\KeyValueStore\MemoryKeyValueStore;
+use Symfony\Component\Clock\NativeClock;
 
 $browse = (new BrowseFactory(ApiHost::production()))->create(
     'your-client-id',
     'your-client-secret',
     new Marketplace(MarketplaceId::EBAY_GB),   // optionally: end-user context, Accept-Language
-    new MemoryKeyValueStore()
+    new MemoryKeyValueStore(new NativeClock())
 );
 
 $itemApi = $browse->getItemApi();                    // ItemApiInterface
@@ -83,7 +84,7 @@ $browse = (new BrowseFactory(ApiHost::sandbox()))->create(
     'your-sandbox-client-id',
     'your-sandbox-client-secret',
     new Marketplace(MarketplaceId::EBAY_GB),
-    new MemoryKeyValueStore()
+    new MemoryKeyValueStore(new NativeClock())
 );
 ```
 
@@ -245,31 +246,32 @@ Under the hood, `Browse` wires the clients, their transformer chains, and the OA
 Every client takes a request sender, its transformer chain, a `CredentialsInterface` and an `ApiHostInterface`. The credentials and the host are the same for all three, so they are built once:
 
 ```php
-use ChristianBrown\ApiClient\ApiClient;
-use ChristianBrown\EBay\Browse\Auth\ApplicationAccessTokenTransformer;
+use ChristianBrown\ApiClient\ApiClientFactory;
+use ChristianBrown\ApiClient\ClientOptions;
 use ChristianBrown\EBay\Browse\Auth\Credentials;
 use ChristianBrown\EBay\Browse\Enums\MarketplaceId;
 use ChristianBrown\EBay\Browse\Http\ApiHost;
 use ChristianBrown\EBay\Browse\Marketplace;
 use ChristianBrown\KeyValueStore\MemoryKeyValueStore;
-use ChristianBrown\OAuth2Client\ClientCredentialsTokenManager;
-use ChristianBrown\OAuth2Client\Transformer\AccessTokenTransformer;
+use ChristianBrown\OAuth2Client\ClientCredentialsTokenManagerFactory;
+use ChristianBrown\OAuth2Client\Lock\NullLock;
+use Symfony\Component\Clock\NativeClock;
 
 // Shared JSON request sender (wires Guzzle for you).
-$requestSender = (new ApiClient())->getJsonApiRequestSender();
+$requestSender = (new ApiClientFactory(new ClientOptions()))->create()->getJsonApiRequestSender();
 
 // ApiHost::production() talks to api.ebay.com; ApiHost::sandbox() switches
 // every client and the token exchange below to eBay's sandbox gateway.
 $apiHost = ApiHost::production();
 
-// OAuth2 client-credentials machinery. The extra token transformer rewrites
-// eBay's non-standard `token_type: "Application Access Token"` to `Bearer`
-// before the shared OAuth2 transformer, which only knows `Bearer`, sees it.
-$tokenManager = new ClientCredentialsTokenManager(
+// OAuth2 client-credentials machinery. The lock is required: NullLock never
+// blocks, which is right when one process refreshes the token at a time.
+$clock = new NativeClock();
+$tokenManager = (new ClientCredentialsTokenManagerFactory($clock))->create(
     $requestSender,
-    new MemoryKeyValueStore(),
-    new ApplicationAccessTokenTransformer(new AccessTokenTransformer()),
-    $apiHost->oauthTokenUrl()
+    new MemoryKeyValueStore($clock),
+    $apiHost->oauthTokenUrl(),
+    new NullLock()
 );
 
 $credentials = new Credentials(
@@ -348,7 +350,14 @@ $browse = (new BrowseFactory(ApiHost::sandbox()))->create($clientId, $clientSecr
 
 If you construct clients by hand, `ItemApi` now requires its `ItemsResponseTransformerInterface` and
 `getItems()` cache, and `ApiClientServiceRegistrar` requires its `getItems()` cache, instead of
-building defaults. `ItemTransformer` takes eight part transformers instead of 29 nested ones.
+building defaults. `CoreServiceRegistrar` now takes the `ApiClientInterface`, a
+`ClientCredentialsTokenManagerFactoryInterface` and a `LockInterface`; `BrowseFactory` supplies them. `ItemTransformer` takes eight part transformers instead of 29 nested ones.
+
+This release also moves to `christianjbrown/api-client` 3, `christianjbrown/oauth2-client` 2.1 and
+`christianjbrown/key-value-store` 3. The access-token store you pass to `create()` must be built for
+key-value-store 3: `new MemoryKeyValueStore(new NativeClock())` (it now needs a PSR-20 clock and
+enforces TTLs), and `FirestoreKeyValueStore` takes a clock too. The package now requires `psr/clock`
+and `symfony/clock`.
 
 ## :memo: Changelog
 

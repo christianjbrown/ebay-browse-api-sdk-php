@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace ChristianBrown\EBay\Browse\Tests\Container;
 
+use ChristianBrown\ApiClient\ApiClientFactory;
+use ChristianBrown\ApiClient\ClientOptions;
 use ChristianBrown\EBay\Browse\Api\ItemApi;
 use ChristianBrown\EBay\Browse\BrowseInterface;
 use ChristianBrown\EBay\Browse\Cache\ArrayKeyedCache;
@@ -19,9 +21,12 @@ use ChristianBrown\EBay\Browse\Model\ItemInterface;
 use ChristianBrown\EBay\Browse\Model\ItemsResponseInterface;
 use ChristianBrown\EBay\Browse\Model\SearchPagedCollectionInterface;
 use ChristianBrown\KeyValueStore\MemoryKeyValueStore;
+use ChristianBrown\OAuth2Client\ClientCredentialsTokenManagerFactory;
+use ChristianBrown\OAuth2Client\Lock\NullLock;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\UsesClass;
 use PHPUnit\Framework\TestCase;
+use Symfony\Component\Clock\MockClock;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
 
 #[CoversClass(ApiClientServiceRegistrar::class)]
@@ -62,7 +67,7 @@ final class ApiClientServiceRegistrarTest extends TestCase
          */
         $itemsCache = new ArrayKeyedCache();
         $container = new ContainerBuilder();
-        (new CoreServiceRegistrar('client-id', 'client-secret', new Marketplace(MarketplaceId::EBAY_GB), new MemoryKeyValueStore(), $apiHost))->register($container);
+        (new CoreServiceRegistrar('client-id', 'client-secret', new Marketplace(MarketplaceId::EBAY_GB), new MemoryKeyValueStore(new MockClock()), $apiHost, (new ApiClientFactory(new ClientOptions()))->create(), new ClientCredentialsTokenManagerFactory(new MockClock()), new NullLock()))->register($container);
         (new LeafTransformerServiceRegistrar())->register($container);
         (new ComposedTransformerServiceRegistrar())->register($container);
         $registrar = new ApiClientServiceRegistrar($apiHost, $itemOneCache, $itemLegacyCache, $itemGroupCache, $itemSummarySearchCache, $itemsCache);

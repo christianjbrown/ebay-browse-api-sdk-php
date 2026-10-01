@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace ChristianBrown\EBay\Browse;
 
+use ChristianBrown\ApiClient\ApiClientFactory;
+use ChristianBrown\ApiClient\ClientOptions;
 use ChristianBrown\EBay\Browse\Cache\ArrayKeyedCache;
 use ChristianBrown\EBay\Browse\Container\ApiClientServiceRegistrar;
 use ChristianBrown\EBay\Browse\Container\ComposedTransformerServiceRegistrar;
@@ -16,6 +18,9 @@ use ChristianBrown\EBay\Browse\Model\ItemInterface;
 use ChristianBrown\EBay\Browse\Model\ItemsResponseInterface;
 use ChristianBrown\EBay\Browse\Model\SearchPagedCollectionInterface;
 use ChristianBrown\KeyValueStore\TtlAwareKeyValueStoreInterface;
+use ChristianBrown\OAuth2Client\ClientCredentialsTokenManagerFactory;
+use ChristianBrown\OAuth2Client\Lock\NullLock;
+use Symfony\Component\Clock\NativeClock;
 
 /**
  * The composition root: the one place that builds the SDK's object graph.
@@ -60,14 +65,15 @@ final class BrowseFactory implements BrowseFactoryInterface
          */
         $itemsCache = new ArrayKeyedCache();
 
-        // The registrars run in dependency order: core (credentials and the
+        // The SDK takes no lock, so token refreshes are not serialised across
+        // processes: NullLock never blocks. The registrars run in dependency order: core (credentials and the
         // OAuth2 machinery) must exist before any transformer or client
         // references it, leaf transformers before the composed transformers
         // that wrap them, and both transformer groups before the API clients
         // that consume them.
         $containerFactory = new ContainerFactory(
             [
-                new CoreServiceRegistrar($clientId, $clientSecret, $marketplace, $accessTokenStore, $this->apiHost),
+                new CoreServiceRegistrar($clientId, $clientSecret, $marketplace, $accessTokenStore, $this->apiHost, (new ApiClientFactory(new ClientOptions()))->create(), new ClientCredentialsTokenManagerFactory(new NativeClock()), new NullLock()),
                 new LeafTransformerServiceRegistrar(),
                 new ComposedTransformerServiceRegistrar(),
                 new ApiClientServiceRegistrar($this->apiHost, $itemOneCache, $itemLegacyCache, $itemGroupCache, $itemSummarySearchCache, $itemsCache),

@@ -11,7 +11,6 @@ use ChristianBrown\EBay\Browse\Api\ItemSummaryApiInterface;
 interface BrowseInterface
 {
     public const string OAUTH_TOKEN_URL = 'https://api.ebay.com/identity/v1/oauth2/token';
-    public const string SERVICE_ACCESS_TOKEN_TRANSFORMER = 'ebay_browse.transformer.access_token_transformer';
     public const string SERVICE_ADDITIONAL_PRODUCT_IDENTITIES_TRANSFORMER = 'ebay_browse.transformer.additional_product_identities_transformer';
     public const string SERVICE_ADDITIONAL_PRODUCT_IDENTITY_TRANSFORMER = 'ebay_browse.transformer.additional_product_identity_transformer';
     public const string SERVICE_ADDON_SERVICE_TRANSFORMER = 'ebay_browse.transformer.addon_service_transformer';

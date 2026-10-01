@@ -98,12 +98,11 @@ StudlyCase `EBay`.
 - **`Marketplace`** (`src/Marketplace.php`) — a small value object holding a `MarketplaceId` enum
   case plus the optional end-user context and `Accept-Language`. `toHeaders()` builds
   `X-EBAY-C-MARKETPLACE-ID`, `X-EBAY-C-ENDUSERCTX` and `Accept-Language`.
-- **`Auth/`** — `Credentials` resolves an application (client-credentials) OAuth2 token through
-  `christianjbrown/oauth2-client`'s `ClientCredentialsTokenManager` and merges the bearer header
-  with the marketplace headers. `ApplicationAccessTokenTransformer` sits in front of the shared
-  `AccessTokenTransformer` and rewrites eBay's non-standard
-  `token_type: "Application Access Token"` to `Bearer`, which is the only type the shared library
-  models; without it every token exchange fails.
+- **`Auth/`** - `Credentials` resolves an application (client-credentials) OAuth2 token through
+  `christianjbrown/oauth2-client`'s `ClientCredentialsTokenManagerInterface` and merges the bearer
+  header with the marketplace headers. `CoreServiceRegistrar` gets the token manager from
+  `ClientCredentialsTokenManagerFactory` (built by `BrowseFactory` with a `NativeClock`), with a
+  `NullLock`, because the SDK takes no lock.
 - **`Api/`** — HTTP clients (`ItemApi`, `ItemCompatibilityApi`, `ItemSummaryApi`). Each is
   constructed with a `JsonApiRequestSenderInterface` (from `christianjbrown/api-client` — no
   Guzzle/PSR-18 used directly), its transformer(s), a `CredentialsInterface` and an

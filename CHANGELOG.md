@@ -18,6 +18,11 @@ All notable changes to this package are recorded here. The format follows
 
 ### Changed
 
+- Requires `christianjbrown/api-client` ^3.0, `christianjbrown/oauth2-client` ^2.1 and
+  `christianjbrown/key-value-store` ^3.0, plus `psr/clock` and `symfony/clock`. Consumers now get those
+  majors: build the token store with a clock, e.g. `new MemoryKeyValueStore(new NativeClock())`.
+- `CoreServiceRegistrar` takes an `ApiClientInterface`, a `ClientCredentialsTokenManagerFactoryInterface`
+  and a `LockInterface` (`BrowseFactory` passes `NullLock`). The token manager is built by the factory.
 - The `Browse` constructor takes a PSR-11 `ContainerInterface` and builds nothing. Replace
   `new Browse($clientId, $clientSecret, $marketplace, $store, $apiHost)` with
   `(new BrowseFactory($apiHost))->create($clientId, $clientSecret, $marketplace, $store)`.
@@ -25,6 +30,10 @@ All notable changes to this package are recorded here. The format follows
 - `ItemTransformer` takes the eight part transformers instead of 29 nested transformers. Output is unchanged.
 - `ItemApi` requires its `ItemsResponseTransformerInterface` and `getItems()` cache instead of
   building defaults, and `ApiClientServiceRegistrar` requires its `getItems()` cache.
+
+### Removed
+
+- `BrowseInterface::SERVICE_ACCESS_TOKEN_TRANSFORMER`: the OAuth2 library now builds its own transformer.
 
 ## [1.1.1] - 2026-09-30
 

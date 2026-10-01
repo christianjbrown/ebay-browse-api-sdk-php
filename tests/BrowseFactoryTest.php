@@ -140,6 +140,7 @@ use ChristianBrown\KeyValueStore\MemoryKeyValueStore;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\UsesClass;
 use PHPUnit\Framework\TestCase;
+use Symfony\Component\Clock\MockClock;
 
 #[CoversClass(BrowseFactory::class)]
 #[UsesClass(Browse::class)]
@@ -284,7 +285,7 @@ final class BrowseFactoryTest extends TestCase
 
     public function testItemApiWithASandboxApiHost(): void
     {
-        $browse = (new BrowseFactory(ApiHost::sandbox()))->create('test-client-id', 'test-client-secret', new Marketplace(MarketplaceId::EBAY_GB), new MemoryKeyValueStore());
+        $browse = (new BrowseFactory(ApiHost::sandbox()))->create('test-client-id', 'test-client-secret', new Marketplace(MarketplaceId::EBAY_GB), new MemoryKeyValueStore(new MockClock()));
 
         self::assertInstanceOf(ItemApiInterface::class, $browse->getItemApi());
     }
@@ -315,6 +316,6 @@ final class BrowseFactoryTest extends TestCase
 
     private function buildBrowse(): BrowseInterface
     {
-        return (new BrowseFactory(ApiHost::production()))->create('test-client-id', 'test-client-secret', new Marketplace(MarketplaceId::EBAY_GB), new MemoryKeyValueStore());
+        return (new BrowseFactory(ApiHost::production()))->create('test-client-id', 'test-client-secret', new Marketplace(MarketplaceId::EBAY_GB), new MemoryKeyValueStore(new MockClock()));
     }
 }
