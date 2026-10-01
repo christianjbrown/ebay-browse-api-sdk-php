@@ -47,8 +47,16 @@ use ChristianBrown\EBay\Browse\Transformer\HazardousMaterialsLabelsTransformerIn
 use ChristianBrown\EBay\Browse\Transformer\ImagesTransformerInterface;
 use ChristianBrown\EBay\Browse\Transformer\ImageTransformerInterface;
 use ChristianBrown\EBay\Browse\Transformer\ItemCharityTermsTransformerInterface;
+use ChristianBrown\EBay\Browse\Transformer\ItemComplianceTransformer;
+use ChristianBrown\EBay\Browse\Transformer\ItemConditionTransformer;
+use ChristianBrown\EBay\Browse\Transformer\ItemDescriptionTransformer;
+use ChristianBrown\EBay\Browse\Transformer\ItemFulfilmentTransformer;
 use ChristianBrown\EBay\Browse\Transformer\ItemGroupSummaryTransformerInterface;
+use ChristianBrown\EBay\Browse\Transformer\ItemListingTransformer;
 use ChristianBrown\EBay\Browse\Transformer\ItemLocationTransformerInterface;
+use ChristianBrown\EBay\Browse\Transformer\ItemMediaTransformer;
+use ChristianBrown\EBay\Browse\Transformer\ItemPricingTransformer;
+use ChristianBrown\EBay\Browse\Transformer\ItemProductTransformer;
 use ChristianBrown\EBay\Browse\Transformer\ItemTransformer;
 use ChristianBrown\EBay\Browse\Transformer\ItemTransformerInterface;
 use ChristianBrown\EBay\Browse\Transformer\MarketingPriceTransformerInterface;
@@ -74,6 +82,14 @@ use PHPUnit\Framework\TestCase;
 use function sprintf;
 
 #[CoversClass(Item::class)]
+#[CoversClass(ItemDescriptionTransformer::class)]
+#[CoversClass(ItemConditionTransformer::class)]
+#[CoversClass(ItemMediaTransformer::class)]
+#[CoversClass(ItemPricingTransformer::class)]
+#[CoversClass(ItemFulfilmentTransformer::class)]
+#[CoversClass(ItemListingTransformer::class)]
+#[CoversClass(ItemProductTransformer::class)]
+#[CoversClass(ItemComplianceTransformer::class)]
 #[CoversClass(ItemTransformer::class)]
 final class ItemTransformerTest extends TestCase
 {
@@ -1166,6 +1182,15 @@ final class ItemTransformerTest extends TestCase
         $typedNameValuesTransformer = self::createStub(TypedNameValuesTransformerInterface::class);
         $typedNameValuesTransformer->method('transform')->willReturn([$this->typedNameValue]);
 
-        return new ItemTransformer($addonServicesTransformer, $authenticityGuaranteeProgramTransformer, $authenticityVerificationProgramTransformer, $availableCouponsTransformer, $companyAddressTransformer, $conditionDescriptorsTransformer, $convertedAmountTransformer, $errorsTransformer, $estimatedAvailabilitiesTransformer, $hazardousMaterialsLabelsTransformer, $imageTransformer, $imagesTransformer, $itemCharityTermsTransformer, $itemGroupSummaryTransformer, $itemLocationTransformer, $marketingPriceTransformer, $paymentMethodsTransformer, $productSafetyLabelsTransformer, $productTransformer, $responsiblePersonsTransformer, $returnTermsTransformer, $reviewRatingTransformer, $sellerCustomPoliciesTransformer, $sellerTransformer, $shipToLocationsTransformer, $shippingOptionsTransformer, $stringsTransformer, $taxesTransformer, $typedNameValuesTransformer);
+        return new ItemTransformer(
+            new ItemDescriptionTransformer($typedNameValuesTransformer),
+            new ItemConditionTransformer($conditionDescriptorsTransformer),
+            new ItemMediaTransformer($imageTransformer, $imagesTransformer),
+            new ItemPricingTransformer($availableCouponsTransformer, $convertedAmountTransformer, $marketingPriceTransformer, $paymentMethodsTransformer, $stringsTransformer, $taxesTransformer),
+            new ItemFulfilmentTransformer($addonServicesTransformer, $estimatedAvailabilitiesTransformer, $itemLocationTransformer, $returnTermsTransformer, $shipToLocationsTransformer, $shippingOptionsTransformer),
+            new ItemListingTransformer($authenticityGuaranteeProgramTransformer, $authenticityVerificationProgramTransformer, $itemCharityTermsTransformer, $sellerCustomPoliciesTransformer, $sellerTransformer, $stringsTransformer),
+            new ItemProductTransformer($itemGroupSummaryTransformer, $productTransformer, $reviewRatingTransformer),
+            new ItemComplianceTransformer($companyAddressTransformer, $errorsTransformer, $hazardousMaterialsLabelsTransformer, $productSafetyLabelsTransformer, $responsiblePersonsTransformer),
+        );
     }
 }

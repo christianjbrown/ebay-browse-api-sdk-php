@@ -69,9 +69,17 @@ interface BrowseInterface
     public const string SERVICE_ITEM_API = 'ebay_browse.api.item_api';
     public const string SERVICE_ITEM_CHARITY_TERMS_TRANSFORMER = 'ebay_browse.transformer.item_charity_terms_transformer';
     public const string SERVICE_ITEM_COMPATIBILITY_API = 'ebay_browse.api.item_compatibility_api';
+    public const string SERVICE_ITEM_COMPLIANCE_TRANSFORMER = 'ebay_browse.transformer.item_compliance_transformer';
+    public const string SERVICE_ITEM_CONDITION_TRANSFORMER = 'ebay_browse.transformer.item_condition_transformer';
+    public const string SERVICE_ITEM_DESCRIPTION_TRANSFORMER = 'ebay_browse.transformer.item_description_transformer';
+    public const string SERVICE_ITEM_FULFILMENT_TRANSFORMER = 'ebay_browse.transformer.item_fulfilment_transformer';
     public const string SERVICE_ITEM_GROUP_SUMMARY_TRANSFORMER = 'ebay_browse.transformer.item_group_summary_transformer';
     public const string SERVICE_ITEM_GROUP_TRANSFORMER = 'ebay_browse.transformer.item_group_transformer';
+    public const string SERVICE_ITEM_LISTING_TRANSFORMER = 'ebay_browse.transformer.item_listing_transformer';
     public const string SERVICE_ITEM_LOCATION_TRANSFORMER = 'ebay_browse.transformer.item_location_transformer';
+    public const string SERVICE_ITEM_MEDIA_TRANSFORMER = 'ebay_browse.transformer.item_media_transformer';
+    public const string SERVICE_ITEM_PRICING_TRANSFORMER = 'ebay_browse.transformer.item_pricing_transformer';
+    public const string SERVICE_ITEM_PRODUCT_TRANSFORMER = 'ebay_browse.transformer.item_product_transformer';
     public const string SERVICE_ITEM_SUMMARIES_TRANSFORMER = 'ebay_browse.transformer.item_summaries_transformer';
     public const string SERVICE_ITEM_SUMMARY_API = 'ebay_browse.api.item_summary_api';
     public const string SERVICE_ITEM_SUMMARY_TRANSFORMER = 'ebay_browse.transformer.item_summary_transformer';
