@@ -9,8 +9,8 @@ A strongly-typed, **read-only** PHP 8.5+ client for the
 [eBay Browse API](https://developer.ebay.com/api-docs/buy/browse/overview.html). It reads a single
 item, the items in a multi-variation listing, keyword and image searches, and part compatibility,
 returning typed model objects instead of raw arrays. The primary entry point is the `Browse` facade
-(`src/Browse.php`), which wires the clients and their transformer chains through a Symfony
-`ContainerBuilder`. Hand-wiring the same chains without the container is still fully supported (see
+(`src/Browse.php`), built by `BrowseFactory` (`src/BrowseFactory.php`), which wires the clients and
+their transformer chains through a Symfony `ContainerBuilder`. Hand-wiring the same chains without the container is still fully supported (see
 the "Wiring the clients" section of `README.md`).
 
 Two things matter more than the rest of the surface and must not regress:
@@ -75,20 +75,20 @@ Layers under `src/`, mirrored 1:1 under `tests/`, plus the top-level `Browse` fa
 `ChristianBrown\EBay\Browse\` → `src/`, `ChristianBrown\EBay\Browse\Tests\` → `tests/`. Note the
 StudlyCase `EBay`.
 
-- **`Browse`** (`src/Browse.php`) — the facade/entry point. Constructed with a client id, a client
-  secret, a `MarketplaceInterface`, a `TtlAwareKeyValueStoreInterface` for the access token and an
-  optional `ApiHostInterface` (defaults to `ApiHost::production()`), it builds a list of
-  `ServiceRegistrarInterface` registrars and hands them to a `ContainerFactory`
-  (`src/Container/ContainerFactory.php`), which runs each in order against one Symfony
-  `ContainerBuilder` and returns it. Service ids live on `BrowseInterface` as `SERVICE_*` constants.
-  `Browse` exposes `getItemApi()`, `getItemCompatibilityApi()` and `getItemSummaryApi()` by asking
-  the built container for those services. The registrars, under `src/Container/`, run in dependency
-  order — a service must exist before another registrar references its definition:
+- **`Browse`** (`src/Browse.php`) - the facade. Its constructor takes only a PSR-11
+  `ContainerInterface` and builds nothing. `getItemApi()`, `getItemCompatibilityApi()` and
+  `getItemSummaryApi()` ask that container for the `BrowseInterface::SERVICE_*` ids.
+- **`BrowseFactory`** (`src/BrowseFactory.php`, `BrowseFactoryInterface`) - the composition root and
+  the one place that `new`s collaborators. Constructed with an `ApiHostInterface`, its `create()` takes
+  a client id, a client secret, a `MarketplaceInterface` and a `TtlAwareKeyValueStoreInterface`, builds
+  the five `ArrayKeyedCache` instances and a list of `ServiceRegistrarInterface` registrars, and hands
+  them to a `ContainerFactory` (`src/Container/ContainerFactory.php`), which runs each in order against
+  one Symfony `ContainerBuilder`. The registrars, under `src/Container/`, run in dependency order:
   `CoreServiceRegistrar` (credentials and the OAuth2 machinery), `LeafTransformerServiceRegistrar`,
   `ComposedTransformerServiceRegistrar`, then `ApiClientServiceRegistrar`. Adding a new API group
-  means adding one more registrar to the list `Browse` builds, not editing an existing one.
+  means adding one more registrar to the list `BrowseFactory` builds, not editing an existing one.
 - **`Http/ApiHost`** (`src/Http/ApiHostInterface.php`, `src/Http/ApiHost.php`) — the value object
-  behind the optional fifth `Browse` constructor argument. `ApiHost::production()` (the default) and
+  behind the required `BrowseFactory` constructor argument. `ApiHost::production()` and
   `ApiHost::sandbox()` are named constructors; `browseApiUrl(string $path)` and `oauthTokenUrl()` are
   the two things every `Api` client and `CoreServiceRegistrar` ask it for. The `API_URL_*` constants
   on `ItemApiInterface`/`ItemSummaryApiInterface`/`ItemCompatibilityApiInterface` and
@@ -98,12 +98,11 @@ StudlyCase `EBay`.
 - **`Marketplace`** (`src/Marketplace.php`) — a small value object holding a `MarketplaceId` enum
   case plus the optional end-user context and `Accept-Language`. `toHeaders()` builds
   `X-EBAY-C-MARKETPLACE-ID`, `X-EBAY-C-ENDUSERCTX` and `Accept-Language`.
-- **`Auth/`** — `Credentials` resolves an application (client-credentials) OAuth2 token through
-  `christianjbrown/oauth2-client`'s `ClientCredentialsTokenManager` and merges the bearer header
-  with the marketplace headers. `ApplicationAccessTokenTransformer` sits in front of the shared
-  `AccessTokenTransformer` and rewrites eBay's non-standard
-  `token_type: "Application Access Token"` to `Bearer`, which is the only type the shared library
-  models; without it every token exchange fails.
+- **`Auth/`** - `Credentials` resolves an application (client-credentials) OAuth2 token through
+  `christianjbrown/oauth2-client`'s `ClientCredentialsTokenManagerInterface` and merges the bearer
+  header with the marketplace headers. `CoreServiceRegistrar` gets the token manager from
+  `ClientCredentialsTokenManagerFactory` (built by `BrowseFactory` with a `NativeClock`), with a
+  `NullLock`, because the SDK takes no lock.
 - **`Api/`** — HTTP clients (`ItemApi`, `ItemCompatibilityApi`, `ItemSummaryApi`). Each is
   constructed with a `JsonApiRequestSenderInterface` (from `christianjbrown/api-client` — no
   Guzzle/PSR-18 used directly), its transformer(s), a `CredentialsInterface` and an
@@ -124,6 +123,11 @@ StudlyCase `EBay`.
   `ItemSummariesTransformer` → `ItemSummaryTransformer` → … → leaf). Collection transformers carry
   the plural name (`ImagesTransformer`, `CategoriesTransformer`). `StringsTransformer` is the shared
   leaf for plain string arrays (`buyingOptions`, `deliveryOptions`, `leafCategoryIds`).
+  `ItemTransformer` only validates the item id and creates the `Item`; eight part transformers
+  (`ItemDescriptionTransformer`, `ItemConditionTransformer`, `ItemMediaTransformer`,
+  `ItemPricingTransformer`, `ItemFulfilmentTransformer`, `ItemListingTransformer`,
+  `ItemProductTransformer`, `ItemComplianceTransformer`), each behind its own interface with one
+  `apply(Item, array)` method, map the fields.
 - **`Model/`** — plain, mutable typed DTOs with getters and fluent setters.
 - **`Enums/`** — `MarketplaceId`, the backed enum of eBay's marketplace ids.
 - **`Exception/`** — `final` exception classes + matching interfaces: `ItemNotFoundException` and
@@ -191,7 +195,7 @@ The `phpunit.xml` config is strict (`requireCoverageMetadata`, `beStrictAboutCov
   `beStrictAboutCoverageMetadata` also fails any test that touches a class it neither covers nor
   declares with `#[UsesClass(...)]`. In practice: a transformer test carries
   `#[CoversClass(TheModel::class)]` **and** `#[CoversClass(TheModelTransformer::class)]` because
-  `transform()` constructs the model; `BrowseTest` carries `#[CoversClass(Browse::class)]` plus a
+  `transform()` constructs the model; `BrowseFactoryTest` carries `#[CoversClass(BrowseFactory::class)]` plus a
   `#[UsesClass]` line for every service the container instantiates. Use PHPUnit attributes, not
   annotations: `#[CoversClass]`, `#[UsesClass]`, `#[DataProvider]`, `#[TestWith]`.
 - Tests mirror `src/` 1:1 under `tests/<Layer>/`, one `final class XTest extends TestCase` per
@@ -219,11 +223,11 @@ The `phpunit.xml` config is strict (`requireCoverageMetadata`, `beStrictAboutCov
 4. Wire the new transformer into its parent transformer's constructor, keeping the constructor
    arguments alphabetical.
 5. Register the new services on `BrowseInterface` (`SERVICE_*`) and in the matching
-   `registerLeafTransformers()` / `registerComposedTransformers()` method of `Browse`, after
+   `LeafTransformerServiceRegistrar` / `ComposedTransformerServiceRegistrar`, after
    anything they depend on.
 6. If it's a new endpoint, extend/add the `Api` client and its interface (`API_URL*` constant), and
    remember the `Content-Type` header if it POSTs.
-7. Add matching tests under `tests/<Layer>/`, and a `#[UsesClass]` line in `BrowseTest` for any new
+7. Add matching tests under `tests/<Layer>/`, and a `#[UsesClass]` line in `BrowseFactoryTest` for any new
    service the container builds.
 8. Run `composer fix-style`, then `composer check-style`, then `composer stan`, then `composer test`
    and **confirm the coverage report is 100%** on classes, methods, lines, branches and paths.

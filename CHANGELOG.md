@@ -6,6 +6,37 @@ All notable changes to this package are recorded here. The format follows
 
 ## [Unreleased]
 
+## [2.0.0] - 2026-10-01
+
+### Added
+
+- `BrowseFactory` and `BrowseFactoryInterface`, the composition root that builds the `Browse` facade:
+  `(new BrowseFactory(ApiHost::production()))->create($clientId, $clientSecret, $marketplace, $store)`.
+- Eight part transformers behind their own interfaces (`ItemDescriptionTransformer`,
+  `ItemConditionTransformer`, `ItemMediaTransformer`, `ItemPricingTransformer`,
+  `ItemFulfilmentTransformer`, `ItemListingTransformer`, `ItemProductTransformer` and
+  `ItemComplianceTransformer`), registered in the container under new
+  `BrowseInterface::SERVICE_ITEM_*_TRANSFORMER` ids.
+
+### Changed
+
+- Requires `christianjbrown/api-client` ^3.0, `christianjbrown/oauth2-client` ^2.1 and
+  `christianjbrown/key-value-store` ^3.0, plus `psr/clock` and `symfony/clock`. Consumers now get those
+  majors: build the token store with a clock, e.g. `new MemoryKeyValueStore(new NativeClock())`.
+- `CoreServiceRegistrar` takes an `ApiClientInterface`, a `ClientCredentialsTokenManagerFactoryInterface`
+  and a `LockInterface` (`BrowseFactory` passes `NullLock`). The token manager is built by the factory.
+- The `Browse` constructor takes a PSR-11 `ContainerInterface` and builds nothing. Replace
+  `new Browse($clientId, $clientSecret, $marketplace, $store, $apiHost)` with
+  `(new BrowseFactory($apiHost))->create($clientId, $clientSecret, $marketplace, $store)`.
+- The API host is required: pass `ApiHost::production()` where you used to omit it.
+- `ItemTransformer` takes the eight part transformers instead of 29 nested transformers. Output is unchanged.
+- `ItemApi` requires its `ItemsResponseTransformerInterface` and `getItems()` cache instead of
+  building defaults, and `ApiClientServiceRegistrar` requires its `getItems()` cache.
+
+### Removed
+
+- `BrowseInterface::SERVICE_ACCESS_TOKEN_TRANSFORMER`: the OAuth2 library now builds its own transformer.
+
 ## [1.1.1] - 2026-09-30
 
 ### Changed
@@ -54,7 +85,8 @@ First stable release.
   production and sandbox presets.
 - A single exception hierarchy, so callers do not depend on the underlying HTTP client.
 
-[Unreleased]: https://github.com/christianjbrown/ebay-browse-api-sdk-php/compare/v1.1.1...HEAD
+[Unreleased]: https://github.com/christianjbrown/ebay-browse-api-sdk-php/compare/v2.0.0...HEAD
+[2.0.0]: https://github.com/christianjbrown/ebay-browse-api-sdk-php/compare/v1.1.1...v2.0.0
 [1.1.1]: https://github.com/christianjbrown/ebay-browse-api-sdk-php/compare/v1.1.0...v1.1.1
 [1.1.0]: https://github.com/christianjbrown/ebay-browse-api-sdk-php/compare/v1.0.0...v1.1.0
 [1.0.0]: https://github.com/christianjbrown/ebay-browse-api-sdk-php/releases/tag/v1.0.0

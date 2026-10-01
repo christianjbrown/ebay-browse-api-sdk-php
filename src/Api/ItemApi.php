@@ -8,7 +8,6 @@ use ChristianBrown\ApiClient\Exception\Request\RequestExceptionInterface;
 use ChristianBrown\ApiClient\Exception\Response\BadResponseExceptionInterface;
 use ChristianBrown\ApiClient\JsonApiRequestSenderInterface;
 use ChristianBrown\EBay\Browse\Auth\CredentialsInterface;
-use ChristianBrown\EBay\Browse\Cache\ArrayKeyedCache;
 use ChristianBrown\EBay\Browse\Cache\KeyedCacheInterface;
 use ChristianBrown\EBay\Browse\Exception\ItemNotFoundException;
 use ChristianBrown\EBay\Browse\Exception\MissingInputException;
@@ -17,16 +16,9 @@ use ChristianBrown\EBay\Browse\Http\ApiHostInterface;
 use ChristianBrown\EBay\Browse\Model\ItemGroupInterface;
 use ChristianBrown\EBay\Browse\Model\ItemInterface;
 use ChristianBrown\EBay\Browse\Model\ItemsResponseInterface;
-use ChristianBrown\EBay\Browse\Transformer\ErrorParametersTransformer;
-use ChristianBrown\EBay\Browse\Transformer\ErrorParameterTransformer;
-use ChristianBrown\EBay\Browse\Transformer\ErrorsTransformer;
-use ChristianBrown\EBay\Browse\Transformer\ErrorTransformer;
 use ChristianBrown\EBay\Browse\Transformer\ItemGroupTransformerInterface;
-use ChristianBrown\EBay\Browse\Transformer\ItemsResponseTransformer;
 use ChristianBrown\EBay\Browse\Transformer\ItemsResponseTransformerInterface;
-use ChristianBrown\EBay\Browse\Transformer\ItemsTransformer;
 use ChristianBrown\EBay\Browse\Transformer\ItemTransformerInterface;
-use ChristianBrown\EBay\Browse\Transformer\StringsTransformer;
 use Throwable;
 
 use function array_filter;
@@ -66,18 +58,18 @@ final class ItemApi implements ItemApiInterface
     private JsonApiRequestSenderInterface $requestSender;
 
     /**
-     * @param JsonApiRequestSenderInterface                    $requestSender            Sends every request this client makes
-     * @param ItemTransformerInterface                         $itemTransformer          Builds an ItemInterface from raw response data
-     * @param ItemGroupTransformerInterface                    $itemGroupTransformer     Builds an ItemGroupInterface from raw response data
-     * @param CredentialsInterface                             $credentials              Supplies the auth and marketplace headers
-     * @param ApiHostInterface                                 $apiHost                  Resolves the Browse API base URL
-     * @param KeyedCacheInterface<ItemInterface>               $oneCache                 Keyed by getOneById()'s item id and query string
-     * @param KeyedCacheInterface<ItemInterface>               $legacyCache              Keyed by getOneByLegacyId()'s query string
-     * @param KeyedCacheInterface<ItemGroupInterface>          $itemGroupCache           Keyed by getMultipleByItemGroupId()'s item group id
-     * @param null|ItemsResponseTransformerInterface           $itemsResponseTransformer Builds an ItemsResponseInterface from raw getItems() response data; defaults to the same transformer chain the container wires, so an existing caller that predates getItems() is unaffected
-     * @param null|KeyedCacheInterface<ItemsResponseInterface> $itemsCache               Keyed by getItems()'s query string
+     * @param JsonApiRequestSenderInterface               $requestSender            Sends every request this client makes
+     * @param ItemTransformerInterface                    $itemTransformer          Builds an ItemInterface from raw response data
+     * @param ItemGroupTransformerInterface               $itemGroupTransformer     Builds an ItemGroupInterface from raw response data
+     * @param CredentialsInterface                        $credentials              Supplies the auth and marketplace headers
+     * @param ApiHostInterface                            $apiHost                  Resolves the Browse API base URL
+     * @param KeyedCacheInterface<ItemInterface>          $oneCache                 Keyed by getOneById()'s item id and query string
+     * @param KeyedCacheInterface<ItemInterface>          $legacyCache              Keyed by getOneByLegacyId()'s query string
+     * @param KeyedCacheInterface<ItemGroupInterface>     $itemGroupCache           Keyed by getMultipleByItemGroupId()'s item group id
+     * @param ItemsResponseTransformerInterface           $itemsResponseTransformer Builds an ItemsResponseInterface from raw getItems() response data
+     * @param KeyedCacheInterface<ItemsResponseInterface> $itemsCache               Keyed by getItems()'s query string
      */
-    public function __construct(JsonApiRequestSenderInterface $requestSender, ItemTransformerInterface $itemTransformer, ItemGroupTransformerInterface $itemGroupTransformer, CredentialsInterface $credentials, ApiHostInterface $apiHost, KeyedCacheInterface $oneCache, KeyedCacheInterface $legacyCache, KeyedCacheInterface $itemGroupCache, ?ItemsResponseTransformerInterface $itemsResponseTransformer = null, ?KeyedCacheInterface $itemsCache = null)
+    public function __construct(JsonApiRequestSenderInterface $requestSender, ItemTransformerInterface $itemTransformer, ItemGroupTransformerInterface $itemGroupTransformer, CredentialsInterface $credentials, ApiHostInterface $apiHost, KeyedCacheInterface $oneCache, KeyedCacheInterface $legacyCache, KeyedCacheInterface $itemGroupCache, ItemsResponseTransformerInterface $itemsResponseTransformer, KeyedCacheInterface $itemsCache)
     {
         $this->requestSender = $requestSender;
         $this->itemTransformer = $itemTransformer;
@@ -87,8 +79,8 @@ final class ItemApi implements ItemApiInterface
         $this->oneCache = $oneCache;
         $this->legacyCache = $legacyCache;
         $this->itemGroupCache = $itemGroupCache;
-        $this->itemsResponseTransformer = $itemsResponseTransformer ?? self::defaultItemsResponseTransformer($itemTransformer);
-        $this->itemsCache = $itemsCache ?? self::defaultItemsCache();
+        $this->itemsResponseTransformer = $itemsResponseTransformer;
+        $this->itemsCache = $itemsCache;
     }
 
     /**
@@ -302,32 +294,6 @@ final class ItemApi implements ItemApiInterface
             ],
             static fn (?string $value): bool => null !== $value,
         );
-    }
-
-    /**
-     * @return KeyedCacheInterface<ItemsResponseInterface>
-     */
-    private static function defaultItemsCache(): KeyedCacheInterface
-    {
-        /**
-         * @var ArrayKeyedCache<ItemsResponseInterface> $itemsCache
-         */
-        $itemsCache = new ArrayKeyedCache();
-
-        return $itemsCache;
-    }
-
-    /**
-     * The same transformer chain ApiClientServiceRegistrar wires through the
-     * container, built by hand so a caller who constructs ItemApi directly
-     * (see README's "Wiring the clients") and predates getItems() keeps
-     * working without passing one.
-     */
-    private static function defaultItemsResponseTransformer(ItemTransformerInterface $itemTransformer): ItemsResponseTransformerInterface
-    {
-        $errorsTransformer = new ErrorsTransformer(new ErrorTransformer(new ErrorParametersTransformer(new ErrorParameterTransformer()), new StringsTransformer()));
-
-        return new ItemsResponseTransformer($errorsTransformer, new ItemsTransformer($itemTransformer));
     }
 
     /**

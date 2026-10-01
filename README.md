@@ -47,19 +47,23 @@ You supply four things to the `Browse` entry point, plus an optional fifth:
 - your app's **client secret**,
 - a **`MarketplaceInterface`** naming the marketplace to read,
 - a **`TtlAwareKeyValueStoreInterface`** to hold the current access token (an in-memory store is fine — tokens last two hours and are re-fetched as needed; a shared store just saves round-trips),
-- optionally, an **`ApiHostInterface`** naming which eBay environment to call (see [Overriding the API host](#satellite-overriding-the-api-host)); production is the default.
+- an **`ApiHostInterface`** naming which eBay environment to call: `ApiHost::production()` or `ApiHost::sandbox()` (see [Overriding the API host](#satellite-overriding-the-api-host)).
+
+`BrowseFactory` takes the API host and builds the `Browse` facade:
 
 ```php
-use ChristianBrown\EBay\Browse\Browse;
+use ChristianBrown\EBay\Browse\BrowseFactory;
 use ChristianBrown\EBay\Browse\Enums\MarketplaceId;
+use ChristianBrown\EBay\Browse\Http\ApiHost;
 use ChristianBrown\EBay\Browse\Marketplace;
 use ChristianBrown\KeyValueStore\MemoryKeyValueStore;
+use Symfony\Component\Clock\NativeClock;
 
-$browse = new Browse(
+$browse = (new BrowseFactory(ApiHost::production()))->create(
     'your-client-id',
     'your-client-secret',
     new Marketplace(MarketplaceId::EBAY_GB),   // optionally: end-user context, Accept-Language
-    new MemoryKeyValueStore()
+    new MemoryKeyValueStore(new NativeClock())
 );
 
 $itemApi = $browse->getItemApi();                    // ItemApiInterface
@@ -69,25 +73,24 @@ $compatibilityApi = $browse->getItemCompatibilityApi(); // ItemCompatibilityApiI
 
 ### :satellite: Overriding the API host
 
-Every request, including the OAuth2 token exchange, goes to eBay's production host by default. To
-point the client at eBay's sandbox instead, pass `ApiHost::sandbox()` as the fifth argument:
+Every request, including the OAuth2 token exchange, goes to the host you give `BrowseFactory`. To
+point the client at eBay's sandbox, pass `ApiHost::sandbox()` instead of `ApiHost::production()`:
 
 ```php
-use ChristianBrown\EBay\Browse\Browse;
+use ChristianBrown\EBay\Browse\BrowseFactory;
 use ChristianBrown\EBay\Browse\Http\ApiHost;
 
-$browse = new Browse(
+$browse = (new BrowseFactory(ApiHost::sandbox()))->create(
     'your-sandbox-client-id',
     'your-sandbox-client-secret',
     new Marketplace(MarketplaceId::EBAY_GB),
-    new MemoryKeyValueStore(),
-    ApiHost::sandbox()
+    new MemoryKeyValueStore(new NativeClock())
 );
 ```
 
 eBay runs the Buy APIs, including Browse, through a different sandbox gateway host than the rest of
 the platform: `ApiHost::sandbox()` calls the Browse API on `apiz.sandbox.ebay.com` and the OAuth2
-token endpoint on `api.sandbox.ebay.com`. `ApiHost::production()` is the default and calls both on
+token endpoint on `api.sandbox.ebay.com`. `ApiHost::production()` calls both on
 `api.ebay.com`. For any other host (a proxy, a mock server in tests), construct `new
 ApiHost($browseApiBaseUrl, $oauthTokenUrl)` directly.
 
@@ -243,31 +246,32 @@ Under the hood, `Browse` wires the clients, their transformer chains, and the OA
 Every client takes a request sender, its transformer chain, a `CredentialsInterface` and an `ApiHostInterface`. The credentials and the host are the same for all three, so they are built once:
 
 ```php
-use ChristianBrown\ApiClient\ApiClient;
-use ChristianBrown\EBay\Browse\Auth\ApplicationAccessTokenTransformer;
+use ChristianBrown\ApiClient\ApiClientFactory;
+use ChristianBrown\ApiClient\ClientOptions;
 use ChristianBrown\EBay\Browse\Auth\Credentials;
 use ChristianBrown\EBay\Browse\Enums\MarketplaceId;
 use ChristianBrown\EBay\Browse\Http\ApiHost;
 use ChristianBrown\EBay\Browse\Marketplace;
 use ChristianBrown\KeyValueStore\MemoryKeyValueStore;
-use ChristianBrown\OAuth2Client\ClientCredentialsTokenManager;
-use ChristianBrown\OAuth2Client\Transformer\AccessTokenTransformer;
+use ChristianBrown\OAuth2Client\ClientCredentialsTokenManagerFactory;
+use ChristianBrown\OAuth2Client\Lock\NullLock;
+use Symfony\Component\Clock\NativeClock;
 
 // Shared JSON request sender (wires Guzzle for you).
-$requestSender = (new ApiClient())->getJsonApiRequestSender();
+$requestSender = (new ApiClientFactory(new ClientOptions()))->create()->getJsonApiRequestSender();
 
 // ApiHost::production() talks to api.ebay.com; ApiHost::sandbox() switches
 // every client and the token exchange below to eBay's sandbox gateway.
 $apiHost = ApiHost::production();
 
-// OAuth2 client-credentials machinery. The extra token transformer rewrites
-// eBay's non-standard `token_type: "Application Access Token"` to `Bearer`
-// before the shared OAuth2 transformer, which only knows `Bearer`, sees it.
-$tokenManager = new ClientCredentialsTokenManager(
+// OAuth2 client-credentials machinery. The lock is required: NullLock never
+// blocks, which is right when one process refreshes the token at a time.
+$clock = new NativeClock();
+$tokenManager = (new ClientCredentialsTokenManagerFactory($clock))->create(
     $requestSender,
-    new MemoryKeyValueStore(),
-    new ApplicationAccessTokenTransformer(new AccessTokenTransformer()),
-    $apiHost->oauthTokenUrl()
+    new MemoryKeyValueStore($clock),
+    $apiHost->oauthTokenUrl(),
+    new NullLock()
 );
 
 $credentials = new Credentials(
@@ -304,7 +308,7 @@ $compatibilityApi = new ItemCompatibilityApi(
 );
 ```
 
-`ItemTransformer` and `ItemSummaryTransformer` take the same treatment with a longer constructor — read the argument list off the class and hand each nested transformer in, in order. `ItemApi` and `ItemSummaryApi` take the same `$requestSender`, their own transformer chain, `$credentials` and `$apiHost`, plus one `KeyedCacheInterface` argument per independent cache they keep — `ItemSummaryApi` takes one (for `search()`), `ItemApi` takes three (for `getOneById()`, `getOneByLegacyId()` and `getMultipleByItemGroupId()`, in that order), each its own `ArrayKeyedCache` instance:
+`ItemTransformer` is a composition of eight part transformers (`ItemDescriptionTransformer`, `ItemConditionTransformer`, `ItemMediaTransformer`, `ItemPricingTransformer`, `ItemFulfilmentTransformer`, `ItemListingTransformer`, `ItemProductTransformer` and `ItemComplianceTransformer`), each taking the nested transformers for its own fields; `ItemSummaryTransformer` takes a longer constructor. Read the argument list off the class and hand each nested transformer in, in order. `ItemApi` and `ItemSummaryApi` take the same `$requestSender`, their own transformer chain, `$credentials` and `$apiHost`, plus one `KeyedCacheInterface` argument per independent cache they keep: `ItemSummaryApi` takes one (for `search()`), `ItemApi` takes four (for `getOneById()`, `getOneByLegacyId()`, `getMultipleByItemGroupId()` and `getItems()`, in that order) and an `ItemsResponseTransformerInterface` before the `getItems()` cache, each cache its own `ArrayKeyedCache` instance:
 
 ```php
 use ChristianBrown\EBay\Browse\Api\ItemApi;
@@ -318,13 +322,42 @@ $itemApi = new ItemApi(
     $apiHost,
     new ArrayKeyedCache(), // getOneById()
     new ArrayKeyedCache(), // getOneByLegacyId()
-    new ArrayKeyedCache()  // getMultipleByItemGroupId()
+    new ArrayKeyedCache(), // getMultipleByItemGroupId()
+    $itemsResponseTransformer,
+    new ArrayKeyedCache()  // getItems()
 );
 ```
 
-The `Browse` facade's registrars under `src/Container/` (`LeafTransformerServiceRegistrar`, `ComposedTransformerServiceRegistrar`, `ApiClientServiceRegistrar`) are the canonical wiring if you need a reference.
+The registrars under `src/Container/` (`LeafTransformerServiceRegistrar`, `ComposedTransformerServiceRegistrar`, `ApiClientServiceRegistrar`) are the canonical wiring if you need a reference.
 
 </details>
+
+## :arrow_up: Upgrading to 2.0
+
+`Browse` no longer builds anything itself: its constructor takes a PSR-11 container. The default
+wiring moved into `BrowseFactory`, and the API host is now a required argument rather than an
+optional fifth constructor argument.
+
+```php
+// 1.x
+$browse = new Browse($clientId, $clientSecret, $marketplace, $store);
+$browse = new Browse($clientId, $clientSecret, $marketplace, $store, ApiHost::sandbox());
+
+// 2.0
+$browse = (new BrowseFactory(ApiHost::production()))->create($clientId, $clientSecret, $marketplace, $store);
+$browse = (new BrowseFactory(ApiHost::sandbox()))->create($clientId, $clientSecret, $marketplace, $store);
+```
+
+If you construct clients by hand, `ItemApi` now requires its `ItemsResponseTransformerInterface` and
+`getItems()` cache, and `ApiClientServiceRegistrar` requires its `getItems()` cache, instead of
+building defaults. `CoreServiceRegistrar` now takes the `ApiClientInterface`, a
+`ClientCredentialsTokenManagerFactoryInterface` and a `LockInterface`; `BrowseFactory` supplies them. `ItemTransformer` takes eight part transformers instead of 29 nested ones.
+
+This release also moves to `christianjbrown/api-client` 3, `christianjbrown/oauth2-client` 2.1 and
+`christianjbrown/key-value-store` 3. The access-token store you pass to `create()` must be built for
+key-value-store 3: `new MemoryKeyValueStore(new NativeClock())` (it now needs a PSR-20 clock and
+enforces TTLs), and `FirestoreKeyValueStore` takes a clock too. The package now requires `psr/clock`
+and `symfony/clock`.
 
 ## :memo: Changelog
 

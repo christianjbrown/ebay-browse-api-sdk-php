@@ -8,7 +8,6 @@ use ChristianBrown\EBay\Browse\Api\ItemApi;
 use ChristianBrown\EBay\Browse\Api\ItemCompatibilityApi;
 use ChristianBrown\EBay\Browse\Api\ItemSummaryApi;
 use ChristianBrown\EBay\Browse\BrowseInterface;
-use ChristianBrown\EBay\Browse\Cache\ArrayKeyedCache;
 use ChristianBrown\EBay\Browse\Cache\KeyedCacheInterface;
 use ChristianBrown\EBay\Browse\Http\ApiHostInterface;
 use ChristianBrown\EBay\Browse\Model\ItemGroupInterface;
@@ -57,16 +56,16 @@ final class ApiClientServiceRegistrar implements ApiClientServiceRegistrarInterf
      * @param KeyedCacheInterface<ItemInterface>                  $itemLegacyCache
      * @param KeyedCacheInterface<ItemGroupInterface>             $itemGroupCache
      * @param KeyedCacheInterface<SearchPagedCollectionInterface> $itemSummarySearchCache
-     * @param null|KeyedCacheInterface<ItemsResponseInterface>    $itemsCache
+     * @param KeyedCacheInterface<ItemsResponseInterface>         $itemsCache
      */
-    public function __construct(ApiHostInterface $apiHost, KeyedCacheInterface $itemOneCache, KeyedCacheInterface $itemLegacyCache, KeyedCacheInterface $itemGroupCache, KeyedCacheInterface $itemSummarySearchCache, ?KeyedCacheInterface $itemsCache = null)
+    public function __construct(ApiHostInterface $apiHost, KeyedCacheInterface $itemOneCache, KeyedCacheInterface $itemLegacyCache, KeyedCacheInterface $itemGroupCache, KeyedCacheInterface $itemSummarySearchCache, KeyedCacheInterface $itemsCache)
     {
         $this->apiHost = $apiHost;
         $this->itemOneCache = $itemOneCache;
         $this->itemLegacyCache = $itemLegacyCache;
         $this->itemGroupCache = $itemGroupCache;
         $this->itemSummarySearchCache = $itemSummarySearchCache;
-        $this->itemsCache = $itemsCache ?? self::defaultItemsCache();
+        $this->itemsCache = $itemsCache;
     }
 
     public function register(ContainerBuilder $container): void
@@ -107,18 +106,5 @@ final class ApiClientServiceRegistrar implements ApiClientServiceRegistrarInterf
                     $this->itemSummarySearchCache,
                 ]
             );
-    }
-
-    /**
-     * @return KeyedCacheInterface<ItemsResponseInterface>
-     */
-    private static function defaultItemsCache(): KeyedCacheInterface
-    {
-        /**
-         * @var ArrayKeyedCache<ItemsResponseInterface> $itemsCache
-         */
-        $itemsCache = new ArrayKeyedCache();
-
-        return $itemsCache;
     }
 }

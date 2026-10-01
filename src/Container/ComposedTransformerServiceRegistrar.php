@@ -40,8 +40,16 @@ use ChristianBrown\EBay\Browse\Transformer\HazardPictogramsTransformer;
 use ChristianBrown\EBay\Browse\Transformer\HazardStatementsTransformer;
 use ChristianBrown\EBay\Browse\Transformer\ImagesTransformer;
 use ChristianBrown\EBay\Browse\Transformer\ItemCharityTermsTransformer;
+use ChristianBrown\EBay\Browse\Transformer\ItemComplianceTransformer;
+use ChristianBrown\EBay\Browse\Transformer\ItemConditionTransformer;
+use ChristianBrown\EBay\Browse\Transformer\ItemDescriptionTransformer;
+use ChristianBrown\EBay\Browse\Transformer\ItemFulfilmentTransformer;
 use ChristianBrown\EBay\Browse\Transformer\ItemGroupSummaryTransformer;
 use ChristianBrown\EBay\Browse\Transformer\ItemGroupTransformer;
+use ChristianBrown\EBay\Browse\Transformer\ItemListingTransformer;
+use ChristianBrown\EBay\Browse\Transformer\ItemMediaTransformer;
+use ChristianBrown\EBay\Browse\Transformer\ItemPricingTransformer;
+use ChristianBrown\EBay\Browse\Transformer\ItemProductTransformer;
 use ChristianBrown\EBay\Browse\Transformer\ItemsResponseTransformer;
 use ChristianBrown\EBay\Browse\Transformer\ItemsTransformer;
 use ChristianBrown\EBay\Browse\Transformer\ItemSummariesTransformer;
@@ -537,38 +545,95 @@ final class ComposedTransformerServiceRegistrar implements ComposedTransformerSe
                 ]
             );
 
-        $container->register(BrowseInterface::SERVICE_ITEM_TRANSFORMER, ItemTransformer::class)
+        $container->register(BrowseInterface::SERVICE_ITEM_DESCRIPTION_TRANSFORMER, ItemDescriptionTransformer::class)
+            ->setArguments(
+                [
+                    $container->getDefinition(BrowseInterface::SERVICE_TYPED_NAME_VALUES_TRANSFORMER),
+                ]
+            );
+
+        $container->register(BrowseInterface::SERVICE_ITEM_CONDITION_TRANSFORMER, ItemConditionTransformer::class)
+            ->setArguments(
+                [
+                    $container->getDefinition(BrowseInterface::SERVICE_CONDITION_DESCRIPTORS_TRANSFORMER),
+                ]
+            );
+
+        $container->register(BrowseInterface::SERVICE_ITEM_MEDIA_TRANSFORMER, ItemMediaTransformer::class)
+            ->setArguments(
+                [
+                    $container->getDefinition(BrowseInterface::SERVICE_IMAGE_TRANSFORMER),
+                    $container->getDefinition(BrowseInterface::SERVICE_IMAGES_TRANSFORMER),
+                ]
+            );
+
+        $container->register(BrowseInterface::SERVICE_ITEM_PRICING_TRANSFORMER, ItemPricingTransformer::class)
+            ->setArguments(
+                [
+                    $container->getDefinition(BrowseInterface::SERVICE_AVAILABLE_COUPONS_TRANSFORMER),
+                    $container->getDefinition(BrowseInterface::SERVICE_CONVERTED_AMOUNT_TRANSFORMER),
+                    $container->getDefinition(BrowseInterface::SERVICE_MARKETING_PRICE_TRANSFORMER),
+                    $container->getDefinition(BrowseInterface::SERVICE_PAYMENT_METHODS_TRANSFORMER),
+                    $container->getDefinition(BrowseInterface::SERVICE_STRINGS_TRANSFORMER),
+                    $container->getDefinition(BrowseInterface::SERVICE_TAXES_TRANSFORMER),
+                ]
+            );
+
+        $container->register(BrowseInterface::SERVICE_ITEM_FULFILMENT_TRANSFORMER, ItemFulfilmentTransformer::class)
             ->setArguments(
                 [
                     $container->getDefinition(BrowseInterface::SERVICE_ADDON_SERVICES_TRANSFORMER),
-                    $container->getDefinition(BrowseInterface::SERVICE_AUTHENTICITY_GUARANTEE_PROGRAM_TRANSFORMER),
-                    $container->getDefinition(BrowseInterface::SERVICE_AUTHENTICITY_VERIFICATION_PROGRAM_TRANSFORMER),
-                    $container->getDefinition(BrowseInterface::SERVICE_AVAILABLE_COUPONS_TRANSFORMER),
-                    $container->getDefinition(BrowseInterface::SERVICE_COMPANY_ADDRESS_TRANSFORMER),
-                    $container->getDefinition(BrowseInterface::SERVICE_CONDITION_DESCRIPTORS_TRANSFORMER),
-                    $container->getDefinition(BrowseInterface::SERVICE_CONVERTED_AMOUNT_TRANSFORMER),
-                    $container->getDefinition(BrowseInterface::SERVICE_ERRORS_TRANSFORMER),
                     $container->getDefinition(BrowseInterface::SERVICE_ESTIMATED_AVAILABILITIES_TRANSFORMER),
-                    $container->getDefinition(BrowseInterface::SERVICE_HAZARDOUS_MATERIALS_LABELS_TRANSFORMER),
-                    $container->getDefinition(BrowseInterface::SERVICE_IMAGE_TRANSFORMER),
-                    $container->getDefinition(BrowseInterface::SERVICE_IMAGES_TRANSFORMER),
-                    $container->getDefinition(BrowseInterface::SERVICE_ITEM_CHARITY_TERMS_TRANSFORMER),
-                    $container->getDefinition(BrowseInterface::SERVICE_ITEM_GROUP_SUMMARY_TRANSFORMER),
                     $container->getDefinition(BrowseInterface::SERVICE_ITEM_LOCATION_TRANSFORMER),
-                    $container->getDefinition(BrowseInterface::SERVICE_MARKETING_PRICE_TRANSFORMER),
-                    $container->getDefinition(BrowseInterface::SERVICE_PAYMENT_METHODS_TRANSFORMER),
-                    $container->getDefinition(BrowseInterface::SERVICE_PRODUCT_SAFETY_LABELS_TRANSFORMER),
-                    $container->getDefinition(BrowseInterface::SERVICE_PRODUCT_TRANSFORMER),
-                    $container->getDefinition(BrowseInterface::SERVICE_RESPONSIBLE_PERSONS_TRANSFORMER),
                     $container->getDefinition(BrowseInterface::SERVICE_RETURN_TERMS_TRANSFORMER),
-                    $container->getDefinition(BrowseInterface::SERVICE_REVIEW_RATING_TRANSFORMER),
-                    $container->getDefinition(BrowseInterface::SERVICE_SELLER_CUSTOM_POLICIES_TRANSFORMER),
-                    $container->getDefinition(BrowseInterface::SERVICE_SELLER_TRANSFORMER),
                     $container->getDefinition(BrowseInterface::SERVICE_SHIP_TO_LOCATIONS_TRANSFORMER),
                     $container->getDefinition(BrowseInterface::SERVICE_SHIPPING_OPTIONS_TRANSFORMER),
+                ]
+            );
+
+        $container->register(BrowseInterface::SERVICE_ITEM_LISTING_TRANSFORMER, ItemListingTransformer::class)
+            ->setArguments(
+                [
+                    $container->getDefinition(BrowseInterface::SERVICE_AUTHENTICITY_GUARANTEE_PROGRAM_TRANSFORMER),
+                    $container->getDefinition(BrowseInterface::SERVICE_AUTHENTICITY_VERIFICATION_PROGRAM_TRANSFORMER),
+                    $container->getDefinition(BrowseInterface::SERVICE_ITEM_CHARITY_TERMS_TRANSFORMER),
+                    $container->getDefinition(BrowseInterface::SERVICE_SELLER_CUSTOM_POLICIES_TRANSFORMER),
+                    $container->getDefinition(BrowseInterface::SERVICE_SELLER_TRANSFORMER),
                     $container->getDefinition(BrowseInterface::SERVICE_STRINGS_TRANSFORMER),
-                    $container->getDefinition(BrowseInterface::SERVICE_TAXES_TRANSFORMER),
-                    $container->getDefinition(BrowseInterface::SERVICE_TYPED_NAME_VALUES_TRANSFORMER),
+                ]
+            );
+
+        $container->register(BrowseInterface::SERVICE_ITEM_PRODUCT_TRANSFORMER, ItemProductTransformer::class)
+            ->setArguments(
+                [
+                    $container->getDefinition(BrowseInterface::SERVICE_ITEM_GROUP_SUMMARY_TRANSFORMER),
+                    $container->getDefinition(BrowseInterface::SERVICE_PRODUCT_TRANSFORMER),
+                    $container->getDefinition(BrowseInterface::SERVICE_REVIEW_RATING_TRANSFORMER),
+                ]
+            );
+
+        $container->register(BrowseInterface::SERVICE_ITEM_COMPLIANCE_TRANSFORMER, ItemComplianceTransformer::class)
+            ->setArguments(
+                [
+                    $container->getDefinition(BrowseInterface::SERVICE_COMPANY_ADDRESS_TRANSFORMER),
+                    $container->getDefinition(BrowseInterface::SERVICE_ERRORS_TRANSFORMER),
+                    $container->getDefinition(BrowseInterface::SERVICE_HAZARDOUS_MATERIALS_LABELS_TRANSFORMER),
+                    $container->getDefinition(BrowseInterface::SERVICE_PRODUCT_SAFETY_LABELS_TRANSFORMER),
+                    $container->getDefinition(BrowseInterface::SERVICE_RESPONSIBLE_PERSONS_TRANSFORMER),
+                ]
+            );
+
+        $container->register(BrowseInterface::SERVICE_ITEM_TRANSFORMER, ItemTransformer::class)
+            ->setArguments(
+                [
+                    $container->getDefinition(BrowseInterface::SERVICE_ITEM_DESCRIPTION_TRANSFORMER),
+                    $container->getDefinition(BrowseInterface::SERVICE_ITEM_CONDITION_TRANSFORMER),
+                    $container->getDefinition(BrowseInterface::SERVICE_ITEM_MEDIA_TRANSFORMER),
+                    $container->getDefinition(BrowseInterface::SERVICE_ITEM_PRICING_TRANSFORMER),
+                    $container->getDefinition(BrowseInterface::SERVICE_ITEM_FULFILMENT_TRANSFORMER),
+                    $container->getDefinition(BrowseInterface::SERVICE_ITEM_LISTING_TRANSFORMER),
+                    $container->getDefinition(BrowseInterface::SERVICE_ITEM_PRODUCT_TRANSFORMER),
+                    $container->getDefinition(BrowseInterface::SERVICE_ITEM_COMPLIANCE_TRANSFORMER),
                 ]
             );
 
