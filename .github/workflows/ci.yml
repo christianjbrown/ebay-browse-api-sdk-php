@@ -48,8 +48,5 @@ jobs:
       - name: Run tests with coverage
         run: XDEBUG_MODE=coverage php -d memory_limit=-1 ./bin/paratest --processes=$(nproc) --max-batch-size=150 --passthru-php="-d memory_limit=-1" --coverage-text=.phpunit.cache/coverage.txt
 
-      - name: Debug uncovered classes
-        run: sed 's/\x1b\[[0-9;]*m//g' .phpunit.cache/coverage.txt | awk '/^ChristianBrown/{c=$0; next} /Methods:/ && $0 !~ /100.00%/ {print c; print $0}'
-
       - name: Enforce 100% coverage
         run: ./bin/php-coverage-check .phpunit.cache/coverage.txt
