@@ -47,15 +47,18 @@ You supply four things to the `Browse` entry point, plus an optional fifth:
 - your app's **client secret**,
 - a **`MarketplaceInterface`** naming the marketplace to read,
 - a **`TtlAwareKeyValueStoreInterface`** to hold the current access token (an in-memory store is fine — tokens last two hours and are re-fetched as needed; a shared store just saves round-trips),
-- optionally, an **`ApiHostInterface`** naming which eBay environment to call (see [Overriding the API host](#satellite-overriding-the-api-host)); production is the default.
+- an **`ApiHostInterface`** naming which eBay environment to call: `ApiHost::production()` or `ApiHost::sandbox()` (see [Overriding the API host](#satellite-overriding-the-api-host)).
+
+`BrowseFactory` takes the API host and builds the `Browse` facade:
 
 ```php
-use ChristianBrown\EBay\Browse\Browse;
+use ChristianBrown\EBay\Browse\BrowseFactory;
 use ChristianBrown\EBay\Browse\Enums\MarketplaceId;
+use ChristianBrown\EBay\Browse\Http\ApiHost;
 use ChristianBrown\EBay\Browse\Marketplace;
 use ChristianBrown\KeyValueStore\MemoryKeyValueStore;
 
-$browse = new Browse(
+$browse = (new BrowseFactory(ApiHost::production()))->create(
     'your-client-id',
     'your-client-secret',
     new Marketplace(MarketplaceId::EBAY_GB),   // optionally: end-user context, Accept-Language
@@ -69,25 +72,24 @@ $compatibilityApi = $browse->getItemCompatibilityApi(); // ItemCompatibilityApiI
 
 ### :satellite: Overriding the API host
 
-Every request, including the OAuth2 token exchange, goes to eBay's production host by default. To
-point the client at eBay's sandbox instead, pass `ApiHost::sandbox()` as the fifth argument:
+Every request, including the OAuth2 token exchange, goes to the host you give `BrowseFactory`. To
+point the client at eBay's sandbox, pass `ApiHost::sandbox()` instead of `ApiHost::production()`:
 
 ```php
-use ChristianBrown\EBay\Browse\Browse;
+use ChristianBrown\EBay\Browse\BrowseFactory;
 use ChristianBrown\EBay\Browse\Http\ApiHost;
 
-$browse = new Browse(
+$browse = (new BrowseFactory(ApiHost::sandbox()))->create(
     'your-sandbox-client-id',
     'your-sandbox-client-secret',
     new Marketplace(MarketplaceId::EBAY_GB),
-    new MemoryKeyValueStore(),
-    ApiHost::sandbox()
+    new MemoryKeyValueStore()
 );
 ```
 
 eBay runs the Buy APIs, including Browse, through a different sandbox gateway host than the rest of
 the platform: `ApiHost::sandbox()` calls the Browse API on `apiz.sandbox.ebay.com` and the OAuth2
-token endpoint on `api.sandbox.ebay.com`. `ApiHost::production()` is the default and calls both on
+token endpoint on `api.sandbox.ebay.com`. `ApiHost::production()` calls both on
 `api.ebay.com`. For any other host (a proxy, a mock server in tests), construct `new
 ApiHost($browseApiBaseUrl, $oauthTokenUrl)` directly.
 
@@ -304,7 +306,7 @@ $compatibilityApi = new ItemCompatibilityApi(
 );
 ```
 
-`ItemTransformer` and `ItemSummaryTransformer` take the same treatment with a longer constructor — read the argument list off the class and hand each nested transformer in, in order. `ItemApi` and `ItemSummaryApi` take the same `$requestSender`, their own transformer chain, `$credentials` and `$apiHost`, plus one `KeyedCacheInterface` argument per independent cache they keep — `ItemSummaryApi` takes one (for `search()`), `ItemApi` takes three (for `getOneById()`, `getOneByLegacyId()` and `getMultipleByItemGroupId()`, in that order), each its own `ArrayKeyedCache` instance:
+`ItemTransformer` is a composition of eight part transformers (`ItemDescriptionTransformer`, `ItemConditionTransformer`, `ItemMediaTransformer`, `ItemPricingTransformer`, `ItemFulfilmentTransformer`, `ItemListingTransformer`, `ItemProductTransformer` and `ItemComplianceTransformer`), each taking the nested transformers for its own fields; `ItemSummaryTransformer` takes a longer constructor. Read the argument list off the class and hand each nested transformer in, in order. `ItemApi` and `ItemSummaryApi` take the same `$requestSender`, their own transformer chain, `$credentials` and `$apiHost`, plus one `KeyedCacheInterface` argument per independent cache they keep: `ItemSummaryApi` takes one (for `search()`), `ItemApi` takes four (for `getOneById()`, `getOneByLegacyId()`, `getMultipleByItemGroupId()` and `getItems()`, in that order) and an `ItemsResponseTransformerInterface` before the `getItems()` cache, each cache its own `ArrayKeyedCache` instance:
 
 ```php
 use ChristianBrown\EBay\Browse\Api\ItemApi;
@@ -318,13 +320,35 @@ $itemApi = new ItemApi(
     $apiHost,
     new ArrayKeyedCache(), // getOneById()
     new ArrayKeyedCache(), // getOneByLegacyId()
-    new ArrayKeyedCache()  // getMultipleByItemGroupId()
+    new ArrayKeyedCache(), // getMultipleByItemGroupId()
+    $itemsResponseTransformer,
+    new ArrayKeyedCache()  // getItems()
 );
 ```
 
-The `Browse` facade's registrars under `src/Container/` (`LeafTransformerServiceRegistrar`, `ComposedTransformerServiceRegistrar`, `ApiClientServiceRegistrar`) are the canonical wiring if you need a reference.
+The registrars under `src/Container/` (`LeafTransformerServiceRegistrar`, `ComposedTransformerServiceRegistrar`, `ApiClientServiceRegistrar`) are the canonical wiring if you need a reference.
 
 </details>
+
+## :arrow_up: Upgrading to 2.0
+
+`Browse` no longer builds anything itself: its constructor takes a PSR-11 container. The default
+wiring moved into `BrowseFactory`, and the API host is now a required argument rather than an
+optional fifth constructor argument.
+
+```php
+// 1.x
+$browse = new Browse($clientId, $clientSecret, $marketplace, $store);
+$browse = new Browse($clientId, $clientSecret, $marketplace, $store, ApiHost::sandbox());
+
+// 2.0
+$browse = (new BrowseFactory(ApiHost::production()))->create($clientId, $clientSecret, $marketplace, $store);
+$browse = (new BrowseFactory(ApiHost::sandbox()))->create($clientId, $clientSecret, $marketplace, $store);
+```
+
+If you construct clients by hand, `ItemApi` now requires its `ItemsResponseTransformerInterface` and
+`getItems()` cache, and `ApiClientServiceRegistrar` requires its `getItems()` cache, instead of
+building defaults. `ItemTransformer` takes eight part transformers instead of 29 nested ones.
 
 ## :memo: Changelog
 

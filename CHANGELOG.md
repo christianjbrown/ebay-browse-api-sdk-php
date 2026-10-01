@@ -6,6 +6,26 @@ All notable changes to this package are recorded here. The format follows
 
 ## [Unreleased]
 
+### Added
+
+- `BrowseFactory` and `BrowseFactoryInterface`, the composition root that builds the `Browse` facade:
+  `(new BrowseFactory(ApiHost::production()))->create($clientId, $clientSecret, $marketplace, $store)`.
+- Eight part transformers behind their own interfaces (`ItemDescriptionTransformer`,
+  `ItemConditionTransformer`, `ItemMediaTransformer`, `ItemPricingTransformer`,
+  `ItemFulfilmentTransformer`, `ItemListingTransformer`, `ItemProductTransformer` and
+  `ItemComplianceTransformer`), registered in the container under new
+  `BrowseInterface::SERVICE_ITEM_*_TRANSFORMER` ids.
+
+### Changed
+
+- The `Browse` constructor takes a PSR-11 `ContainerInterface` and builds nothing. Replace
+  `new Browse($clientId, $clientSecret, $marketplace, $store, $apiHost)` with
+  `(new BrowseFactory($apiHost))->create($clientId, $clientSecret, $marketplace, $store)`.
+- The API host is required: pass `ApiHost::production()` where you used to omit it.
+- `ItemTransformer` takes the eight part transformers instead of 29 nested transformers. Output is unchanged.
+- `ItemApi` requires its `ItemsResponseTransformerInterface` and `getItems()` cache instead of
+  building defaults, and `ApiClientServiceRegistrar` requires its `getItems()` cache.
+
 ## [1.1.1] - 2026-09-30
 
 ### Changed
