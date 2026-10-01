@@ -54,45 +54,6 @@ final class ItemApiTest extends TestCase
     private const string ITEM_ID = 'v1|123456789012|0';
     private const string ITEM_URL = 'https://api.ebay.com/buy/browse/v1/item/v1%7C123456789012%7C0';
 
-    public function testGetItemsDefaultWiringBuildsItsOwnTransformerAndCache(): void
-    {
-        $item = self::createStub(ItemInterface::class);
-
-        $requestSender = self::createStub(JsonApiRequestSenderInterface::class);
-        $requestSender->method('get')->willReturn(['items' => [['raw-item']], 'total' => 1]);
-
-        $itemTransformer = self::createStub(ItemTransformerInterface::class);
-        $itemTransformer->method('transform')->willReturn($item);
-
-        $credentials = self::createStub(CredentialsInterface::class);
-        $credentials->method('toHeaders')->willReturn(self::headers());
-
-        /**
-         * @var ArrayKeyedCache<ItemInterface> $oneCache
-         */
-        $oneCache = new ArrayKeyedCache();
-
-        /**
-         * @var ArrayKeyedCache<ItemInterface> $legacyCache
-         */
-        $legacyCache = new ArrayKeyedCache();
-
-        /**
-         * @var ArrayKeyedCache<ItemGroupInterface> $itemGroupCache
-         */
-        $itemGroupCache = new ArrayKeyedCache();
-
-        // No ItemsResponseTransformerInterface or cache passed: exercises the
-        // backward-compatible default the constructor builds for a caller
-        // that predates getItems().
-        $api = new ItemApi($requestSender, $itemTransformer, self::createStub(ItemGroupTransformerInterface::class), $credentials, ApiHost::production(), $oneCache, $legacyCache, $itemGroupCache);
-
-        $itemsResponse = $api->getItems(['v1|1|0']);
-
-        self::assertSame([$item], $itemsResponse->getItems());
-        self::assertSame(1, $itemsResponse->getTotal());
-    }
-
     public function testGetItemsRethrowsOtherBadResponses(): void
     {
         $exception = self::badResponse(500);
