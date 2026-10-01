@@ -6,6 +6,8 @@ All notable changes to this package are recorded here. The format follows
 
 ## [Unreleased]
 
+## [2.0.0] - 2026-10-01
+
 ### Added
 
 - `BrowseFactory` and `BrowseFactoryInterface`, the composition root that builds the `Browse` facade:
@@ -83,7 +85,8 @@ First stable release.
   production and sandbox presets.
 - A single exception hierarchy, so callers do not depend on the underlying HTTP client.
 
-[Unreleased]: https://github.com/christianjbrown/ebay-browse-api-sdk-php/compare/v1.1.1...HEAD
+[Unreleased]: https://github.com/christianjbrown/ebay-browse-api-sdk-php/compare/v2.0.0...HEAD
+[2.0.0]: https://github.com/christianjbrown/ebay-browse-api-sdk-php/compare/v1.1.1...v2.0.0
 [1.1.1]: https://github.com/christianjbrown/ebay-browse-api-sdk-php/compare/v1.1.0...v1.1.1
 [1.1.0]: https://github.com/christianjbrown/ebay-browse-api-sdk-php/compare/v1.0.0...v1.1.0
 [1.0.0]: https://github.com/christianjbrown/ebay-browse-api-sdk-php/releases/tag/v1.0.0
